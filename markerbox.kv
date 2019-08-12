@@ -1,0 +1,358 @@
+#:kivy 1.11.0
+#:import MeshLinePlot kivy.garden.graph.MeshLinePlot
+
+#:set background_color [0.9, 0.9, 0.9]
+#:set label_text_color [0.2, 0.2, 0.2, 1]
+#:set GRAPH_WIDTH 10 # in seconds
+
+<RadioButton@CheckBox>: 
+    background_checkbox_normal: 'atlas://data/images/defaulttheme/checkbox_radio_off'
+    background_checkbox_down: 'atlas://data/images/defaulttheme/checkbox_radio_on'
+            
+<Row@BoxLayout>:
+    value: ''
+    start: '' 
+    end: ''
+    duration: '' 
+    occurences: ''
+
+    GridLayout:
+        cols: 5
+        rows: 1
+        size_hint_y: None
+        height: dp(60)
+        padding: dp(1)
+        spacing: dp(1)
+        Label:
+            text: root.value
+            markup: True
+        Label:
+            text: root.start
+            markup: True
+        Label:
+            text: root.end     
+            markup: True
+        Label:
+            text: root.duration          
+            markup: True
+        Label:
+            text: root.occurences  
+            markup: True
+
+<SummaryRow@BoxLayout>:
+    value: ''
+    occurences: ''
+    GridLayout:
+        cols: 2
+        rows: 1
+        size_hint_y: None
+        height: dp(60)
+        padding: dp(1)
+        spacing: dp(1)
+        Label:
+            text: root.value
+            markup: True
+        Label:
+            text: root.occurences  
+            markup: True
+
+<MarkerWidget>:
+    rv: rv
+    rv2: rv2
+    tabs: tabs
+    layout: layout
+    input: input
+    output: output
+    marker_graph : marker_graph
+    
+    Accordion:
+        orientation: 'horizontal' 
+        anim_duration: 0
+        
+        AccordionItem:
+            title: 'Input mode'
+            collapse: False
+            on_collapse: root.switch_mode('input', self.collapse)
+
+            BoxLayout:
+                id: layout
+                canvas:
+                    Color:
+                        rgb: background_color 
+                    Rectangle:
+                        size: root.size
+                padding: 6
+                spacing: 6
+                orientation: 'vertical'
+        
+                BoxLayout:
+                    id: input
+                    size_hint_y: None
+                    height: dp(40)
+                    padding: dp(1)
+                    spacing: dp(1)
+                    Switch:
+                        id: track_switch
+                        size_hint: None, 1
+                        width: 100
+                        halign: 'left'
+                        on_active: root.switch_callback(self.active)
+
+                    Label:
+                        text: root.cur_time_string
+                        width: 110
+                        color: label_text_color
+                        size_hint: None, 0.95
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                    Label:
+                        text: "Cur: " + str(root.cur_value)
+                        width: 80
+                        color: label_text_color
+                        size_hint: None, 0.95
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                    Label:
+                        text: root.last_marker
+                        width: 300
+                        color: label_text_color
+                        size_hint: None, 0.95
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                    Button:
+                        text: 'Exit'
+                        color: 1,0,0,1
+                        size_hint: None, 1
+                        width: 100
+                        height: 40
+                        halign: 'right'
+                        #valign: 'center'
+                        on_press: app.stop()                        
+
+                TabbedPanel:
+                    id: tabs
+                    do_default_tab: False
+                    tab_pos: 'top_left'
+                    tab_width: self.parent.width / 4
+                    default_tab: markers_tab
+                    on_current_tab: root.switch_tab(self.current_tab.tab_num)
+                
+                    TabbedPanelItem:
+                        id: markers_tab
+                        text: 'Marker Analysis Table'
+                        tab_num: 1
+
+                        RecycleView:
+                            id: rv
+                            orientation: 'vertical'
+                            padding: 0
+                            spacing: 10
+                            scroll_type: ['bars', 'content']
+                            scroll_wheel_distance: dp(114)
+                            bar_width: dp(10)
+                            viewclass: 'Row'
+                            RecycleBoxLayout:
+                                default_size: None, dp(56)
+                                default_size_hint: 1, None
+                                size_hint_y: None
+                                height: self.minimum_height
+                                orientation: 'vertical'
+                                spacing: dp(2)
+
+                    TabbedPanelItem:
+                        id: summary_tab
+                        text: 'Marker Summary Table'
+                        tab_num: 2                        
+                        RecycleView:
+                            id: rv2
+
+                            orientation: 'vertical'
+                            padding: 0
+                            spacing: 10
+                            scroll_type: ['bars', 'content']
+                            scroll_wheel_distance: dp(114)
+                            bar_width: dp(10)
+                            viewclass: 'SummaryRow'
+                            RecycleBoxLayout:
+                                default_size: None, dp(56)
+                                default_size_hint: 1, None
+                                size_hint_y: None
+                                height: self.minimum_height
+                                orientation: 'vertical'
+                                spacing: dp(2)
+
+                    TabbedPanelItem:
+                        id: bulbs_tab
+                        text: 'Bulbs'
+                        tab_num: 3
+                        BoxLayout:
+                            orientation: "horizontal"
+
+                            GridLayout:
+                                rows: 3
+                                cols: 8
+                                size_hint_y: 0.3
+                                padding: 0.2
+                                val: int(root.bulb_value)
+                                RadioButton:
+                                    active: ((self.parent.val >> 7) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 6) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 5) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 4) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 3) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 2) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 1) & 1)
+                                RadioButton:
+                                    active: ((self.parent.val >> 0) & 1)
+
+                                Label:
+                                    text: '8'
+                                Label:
+                                    text: '7'
+                                Label:
+                                    text: '6'
+                                Label:
+                                    text: '5'
+                                Label:
+                                    text: '4'
+                                Label:
+                                    text: '3'
+                                Label:
+                                    text: '2'
+                                Label:
+                                    text: '1'
+                                Label:
+                                    text: '128'
+                                Label:
+                                    text: '64'
+                                Label:
+                                    text: '32'
+                                Label:
+                                    text: '16'
+                                Label:
+                                    text: '8'
+                                Label:
+                                    text: '4'
+                                Label:
+                                    text: '2'
+                                Label:
+                                    text: '1'
+
+
+                    TabbedPanelItem:
+                        id: graph_tab
+                        text: 'Graph'
+                        tab_num: 4
+                        BoxLayout:
+                            orientation: 'vertical'
+                            marker_graph: marker_graph
+                            Graph:
+                                id: marker_graph
+                                on_touch_down: root.on_touch_down_graph(args[1])
+                                on_touch_up: root.on_touch_up_graph(args[1])
+                                plot: MeshLinePlot
+                                xlabel: 'seconds'
+                                ylabel: 'Value'
+                                x_ticks_major: 1
+                                y_ticks_major: 50
+                                y_grid_label: True
+                                x_grid_label: True
+                                padding: 5
+                                x_grid: True
+                                y_grid: True
+                                xmin: root.xmax - GRAPH_WIDTH
+                                xmax: round(root.xmax, 0)
+                                ymin: 0
+                                ymax: 260
+                                pos: 0, root.height / 6
+                                size: root.width * 7/9 , root.height * 18/24
+                                
+                                
+        AccordionItem:
+            title: 'Output mode'
+            collapse: True
+            #on_collapse: root.switch_mode('input', self.collapse)
+
+            BoxLayout:
+                id: output
+                orientation: 'vertical'
+                canvas:
+                    Color:
+                        rgb: 0.2 , 0.2 , 0.2
+                    Rectangle:
+                        size: root.size
+                padding: 6
+                spacing: 6
+                   
+                Slider:
+                    id: slider
+                    min: 0
+                    max: 255
+                    step: 1
+                    orientation: 'horizontal'
+                    spacing: 10
+                    value: 42
+                    size_hint_y: None
+                    width: 0.9
+
+                GridLayout:
+                    rows: 2
+                    cols: 8
+                    #size_hint_y: 0.3
+                    padding: 0.2
+                    val: int(slider.value)
+                    RadioButton:
+                        id: bulb_7
+                        active: ((self.parent.val >> 7) & 1)
+                    RadioButton:
+                        id: bulb_6
+                        active: ((self.parent.val >> 6) & 1)
+                    RadioButton:
+                        id: bulb_5
+                        active: ((self.parent.val >> 5) & 1)
+                    RadioButton:
+                        id: bulb_4
+                        active: ((self.parent.val >> 4) & 1)
+                    RadioButton:
+                        id: bulb_3
+                        active: ((self.parent.val >> 3) & 1)
+                    RadioButton:
+                        id: bulb_2
+                        active: ((self.parent.val >> 2) & 1)
+                    RadioButton:
+                        id: bulb_1
+                        active: ((self.parent.val >> 1) & 1)
+                    RadioButton:
+                        id: bulb_0
+                        active: ((self.parent.val >> 0) & 1)
+
+                    Label:
+                        text: '8'
+                    Label:
+                        text: '7'
+                    Label:
+                        text: '6'
+                    Label:
+                        text: '5'
+                    Label:
+                        text: '4'
+                    Label:
+                        text: '3'
+                    Label:
+                        text: '2'
+                    Label:
+                        text: '1'                            
+
+                Button:
+                    text: str(sum([int(b)*(2**i) for i, b in enumerate([bulb_0.active, bulb_1.active, bulb_2.active, bulb_3.active, bulb_4.active, bulb_5.active, bulb_6.active, bulb_7.active])]))
+                    on_press: root.output_marker(self.text)
+
