@@ -1,23 +1,27 @@
 import platform
 
-onRPi = (platform.system() == 'Linux')
+onRPi = platform.system() == "Linux"
 
 if onRPi:
     import RPi.GPIO as GPIO
+else:
+    from mock_gpio import GPIO
 
-    GPIO.setmode(GPIO.BCM)
+    GPIO = GPIO()  # instantiate the mock
 
-    PIN_DATA = 26
-    PIN_LATCH = 19
-    PIN_CLOCK = 13
+GPIO.setmode(GPIO.BCM)
 
+PIN_DATA = 26
+PIN_LATCH = 19
+PIN_CLOCK = 13
+
+if not onRPi:
     GPIO.setup(PIN_DATA, GPIO.OUT)
     GPIO.setup(PIN_LATCH, GPIO.OUT)
     GPIO.setup(PIN_CLOCK, GPIO.OUT)
 
 
-class MarkerOut():
-
+class MarkerOut:
     def __init__(self):
         super().__init__()
 
@@ -29,3 +33,6 @@ class MarkerOut():
                 GPIO.output(PIN_CLOCK, 1)
                 GPIO.output(PIN_CLOCK, 0)
             GPIO.output(PIN_LATCH, 1)
+        else:
+            # Optional: log the value in mock mode
+            print(f"[MOCK MarkerOut] sendMarker({value})")

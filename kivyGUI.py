@@ -10,27 +10,33 @@ Created on Fri Nov 16 22:43:49 2018
 # Config.set('graphics', 'left', 0)
 # Config.set('graphics', 'top',  0)
 
-import datetime
 import sys
+
+import datetime
 import time
 
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.garden.graph import Graph, MeshLinePlot
 from kivy.properties import StringProperty, ListProperty, ObjectProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy_garden.graph import MeshLinePlot
 
 import MarkerMonitor as m
 import MarkerOut
 
 INTERVAL = 0.1  # clock interval in seconds
 
-Window.show_cursor = False
+Window.show_cursor = True
 # Window.borderless = True # not working ?
 Window.size = (800, 480)
 
-MM = m.MarkerMonitor(int(sys.argv[1]))
+arg = 1  # default for testing
+if len(sys.argv) > 1:
+    arg = int(sys.argv[1])
+
+MM = m.MarkerMonitor(arg)
+
 MM.markerList = []
 MM.start()
 MM.startTracking()

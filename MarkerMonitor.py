@@ -10,14 +10,19 @@ import random
 import threading
 import time
 
-import GS_timing as timing
-
-onRPi = (platform.system() == 'Linux')
+onRPi = platform.system() == "Linux"
 
 if onRPi:
     import RPi.GPIO as GPIO
+    import GS_timing as timing
+else:
+    from mock_gpio import GPIO
+    import GS_timing_mock as timing
 
-    GPIO.setmode(GPIO.BCM)
+
+    GPIO = GPIO()  # instantiate the mock
+
+GPIO.setmode(GPIO.BCM)
 
 
 # Class for monitoring markers recieved on logic (LPT/TTL) ports.
