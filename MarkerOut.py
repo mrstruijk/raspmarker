@@ -1,3 +1,5 @@
+# MarkerOut.py
+
 import platform
 
 onRPi = platform.system() == "Linux"
@@ -6,7 +8,6 @@ if onRPi:
     import RPi.GPIO as GPIO
 else:
     from mock_gpio import GPIO
-
     GPIO = GPIO()  # instantiate the mock
 
 GPIO.setmode(GPIO.BCM)

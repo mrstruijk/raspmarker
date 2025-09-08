@@ -13,14 +13,12 @@ import time
 onRPi = platform.system() == "Linux"
 
 if onRPi:
-    import RPi.GPIO as GPIO
     import GS_timing as timing
+    import RPi.GPIO as GPIO
 else:
+    import mock_GS_timing as timing
     from mock_gpio import GPIO
-    import GS_timing_mock as timing
-
-
-    GPIO = GPIO()  # instantiate the mock
+    GPIO = GPIO()  # This now gets the singleton instance
 
 GPIO.setmode(GPIO.BCM)
 
@@ -38,9 +36,9 @@ class MarkerMonitor(threading.Thread):
         self.test_markers = test_markers
 
         # Set all ports as GPIO inputs
-        if onRPi:
-            for port in ports:
-                GPIO.setup(port, GPIO.IN)
+        #if onRPi:
+        for port in ports:
+            GPIO.setup(port, GPIO.IN)
 
         # Marker params:
         self.pollInterval_ms = pollInterval_ms
@@ -166,7 +164,8 @@ class MarkerMonitor(threading.Thread):
         return self.markerOccurDict.get(value)
 
     def readCurValue(self):
-        if self.test_markers == 1 and onRPi:
+        #if self.test_markers == 1 and onRPi:
+        if self.test_markers == 1:
             # curMark = 0
 
             # for i, port in enumerate(self.ports):
