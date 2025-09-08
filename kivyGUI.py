@@ -25,19 +25,6 @@ from kivy_garden.graph import MeshLinePlot
 
 import MarkerMonitor as m
 import MarkerOut
-import platform
-
-onRPi = platform.system() == "Linux"
-
-if onRPi:
-    import GS_timing as timing
-    import RPi.GPIO as GPIO
-else:
-    import mock_GS_timing as timing
-    from mock_gpio import GPIO
-    GPIO = GPIO()  # This now gets the singleton instance
-
-GPIO.setmode(GPIO.BCM)
 
 INTERVAL = 0.1  # clock interval in seconds
 
@@ -93,7 +80,6 @@ class MarkerWidget(BoxLayout):
         MM.resetMarkers()
         # check marker thread every 100 milliseconds
         self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)
-        Clock.schedule_once(lambda dt: self.start_console_injector(), 2.0)
 
     def switch_callback(self, switchValue):
         if switchValue:  # switched marker analysis ON
@@ -191,95 +177,6 @@ class MarkerWidget(BoxLayout):
         else:
             self.event.cancel()
         return True
-
-    def inject_test_marker(self, marker_value, duration=1.0):
-        """Inject a test marker directly into the system"""
-
-        def injection_sequence():
-            print(f"Injecting marker {marker_value} for {duration} seconds")
-
-            # Method 1: If using test_markers=1 (real GPIO simulation)
-            if MM.test_markers == 1:
-                pins = [21, 20, 16, 12, 7, 8, 25, 24]
-                # Set the pins according to marker value
-                for i, pin in enumerate(pins):
-                    bit_value = (marker_value >> i) & 1
-                    GPIO.pin_states[pin] = bit_value
-
-                # Wait for duration
-                time.sleep(duration)
-
-                # Clear pins
-                for pin in pins:
-                    GPIO.pin_states[pin] = 0
-
-            # Method 2: If using test_markers=0 (random values)
-            else:
-                # Temporarily override the spoofer
-                original_spoofer = MM.valueSpoofer
-                MM.valueSpoofer = marker_value
-                time.sleep(duration)
-                MM.valueSpoofer = 0
-
-            print(f"Marker {marker_value} injection complete")
-
-        # Run injection in a separate thread so it doesn't block the GUI
-        injection_thread = threading.Thread(target=injection_sequence)
-        injection_thread.daemon = True
-        injection_thread.start()
-
-    def start_console_injector(self):
-        """Start a console-based marker injector"""
-
-        def console_loop():
-            print("\n" + "=" * 50)
-            print("MARKER INJECTOR CONSOLE ACTIVE")
-            print("Commands:")
-            print("  <number>         - Inject marker (0-255)")
-            print("  <number> <time>  - Inject marker for duration")
-            print("  'help'           - Show this help")
-            print("  'quit' or 'q'    - Stop injector")
-            print("=" * 50)
-
-            while True:
-                try:
-                    cmd = input("\nInject marker >>> ").strip()
-
-                    if cmd.lower() in ['quit', 'q', 'exit']:
-                        print("Console injector stopped.")
-                        break
-                    elif cmd.lower() == 'help':
-                        print("Enter a number (0-255) to inject a marker")
-                        print("Optional: add duration in seconds (e.g., '42 1.5')")
-                        continue
-                    elif not cmd:
-                        continue
-
-                    parts = cmd.split()
-                    marker_val = int(parts[0])
-                    duration = float(parts[1]) if len(parts) > 1 else 1.0
-
-                    if not (0 <= marker_val <= 255):
-                        print("ERROR: Marker value must be between 0 and 255")
-                        continue
-
-                    print(f"Injecting marker {marker_val} for {duration} seconds...")
-                    self.inject_test_marker(marker_val, duration)
-
-                except (ValueError, IndexError):
-                    print("ERROR: Invalid input. Use: <marker_value> [duration]")
-                except (KeyboardInterrupt, EOFError):
-                    print("\nConsole injector stopped.")
-                    break
-
-        # Start console in daemon thread
-        console_thread = threading.Thread(target=console_loop, daemon=True)
-        console_thread.start()
-
-    # Add a button or menu item to start the injector, or start it automatically:
-    def on_start_injector_button(self):
-        """Button callback to start the injector"""
-        self.start_console_injector()
 
 class MarkerBoxApp(App):
     def on_stop(self):
