@@ -13,6 +13,7 @@ if onRPi:
     from gpiozero.pins.pigpio import PiGPIOFactory
 else:
     from mock_gpiozero import MockOutputDevice as OutputDevice, MockPiGPIOFactory as PiGPIOFactory
+print(f"Pin_marker_sender is on Pi: {onRPi}")
 
 MARKER_PINS = [21, 20, 16, 12, 7, 8, 25, 24]  # bit 0 to bit 7
 pins = {pin: None for pin in MARKER_PINS}

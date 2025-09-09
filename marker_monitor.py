@@ -14,7 +14,7 @@ if onRPi:
 else:
     import mock_GS_timing as timing
     from mock_gpiozero import MockInputDevice as InputDevice, MockPiGPIOFactory as PiGPIOFactory
-
+print(f"Marker_monitor is on Pi: {onRPi}")
 
 # Class for monitoring markers received on logic (LPT/TTL) ports.
 class MarkerMonitor(threading.Thread):

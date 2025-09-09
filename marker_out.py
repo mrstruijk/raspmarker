@@ -8,6 +8,7 @@ if onRPi:
     from gpiozero.pins.pigpio import PiGPIOFactory
 else:
     from mock_gpiozero import MockOutputDevice as OutputDevice, MockPiGPIOFactory as PiGPIOFactory
+print(f"Marker_out is on Pi: {onRPi}")
 
 PIN_DATA = 26
 PIN_LATCH = 19
