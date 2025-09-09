@@ -1,14 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 16 22:43:49 2018
-
-@author: 
-"""
-# Config.set ('graphics', 'resizable', 0)
-
-# Config.set('graphics', 'position', 'custom')
-# Config.set('graphics', 'left', 0)
-# Config.set('graphics', 'top',  0)
+# kivy_GUI.py
 
 import datetime
 import sys
@@ -21,8 +11,8 @@ from kivy.properties import StringProperty, ListProperty, ObjectProperty, Numeri
 from kivy.uix.boxlayout import BoxLayout
 from kivy_garden.graph import MeshLinePlot
 
-import MarkerMonitor as m
-import MarkerOut
+import marker_monitor as m
+import marker_out
 
 INTERVAL = 0.1  # clock interval in seconds
 
@@ -38,12 +28,12 @@ MM = m.MarkerMonitor(arg)
 
 MM.markerList = []
 MM.start()
-MM.startTracking()
+MM.start_tracking()
 
-MO = MarkerOut.MarkerOut()
+MO = marker_out.MarkerOut()
 
-tableHeader = [{'value': '[b]Value[/b]', 'start': '[b]Start time (s)[/b]', 'end': '[b]End time (s)[/b]', 'duration': '[b]Duration (s)[/b]', 'occurences': '[b]Occurences[/b]'}]
-summaryHeader = [{'value': '[b]Value[/b]', 'occurences': '[b]Occurences[/b]'}]
+tableHeader = [{'value': '[b]Value[/b]', 'start': '[b]Start time (s)[/b]', 'end': '[b]End time (s)[/b]', 'duration': '[b]Duration (s)[/b]', 'occurrences': '[b]occurrences[/b]'}]
+summaryHeader = [{'value': '[b]Value[/b]', 'occurrences': '[b]Occurrences[/b]'}]
 
 
 class MarkerWidget(BoxLayout):
@@ -75,14 +65,14 @@ class MarkerWidget(BoxLayout):
         self.plot = MeshLinePlot(color=[0.2, 0.8, 1, 1])  # graph
         # self.xmax = 0 # set graph x-axis range
         self.marker_graph.add_plot(self.plot)
-        MM.resetMarkers()
+        MM.reset_markers()
         # check marker thread every 100 milliseconds
         self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)
 
     def switch_callback(self, switchValue):
         if switchValue:  # switched marker analysis ON
             self.tracking = True
-            MM.resetMarkers()  # clear markerList
+            MM.reset_markers()  # clear markerList
             self.rv.data = []  # clear marker analysis table
             self.rv2.data = []  # clear marker summary table
             self.plot.points = []  # clear graph
@@ -90,7 +80,7 @@ class MarkerWidget(BoxLayout):
             self.current_marker_count = 0  # reset counters
             self.num_markers_plotted = 0  # reset counter for marker plot
             self.starttimer = time.time()  # set timers
-            self.restart_time = MM.getCurTime()  # set timers
+            self.restart_time = MM.get_cur_time()  # set timers
 
         else:  # marker analysis OFF
             self.tracking = False
@@ -99,22 +89,22 @@ class MarkerWidget(BoxLayout):
             self.create_summary_table()
 
     def clock_callback(self, dt):
-        self.cur_value = MM.readCurValue()
+        self.cur_value = MM.read_cur_value()
         self.cur_time = time.time() - self.starttimer
 
         if len(MM.markerList) > 0:  # show latest marker
-            self.last_marker = "Last: " + str(MM.markerList[-1]['value']) + " (dur: " + str(MM.markerList[-1]['duration'] / 1000) + " s, occur: " + str(MM.markerList[-1]['occurence']) + ")"
+            self.last_marker = "Last: " + str(MM.markerList[-1]['value']) + " (dur: " + str(MM.markerList[-1]['duration'] / 1000) + " s, occur: " + str(MM.markerList[-1]['occurrence']) + ")"
 
         if self.tracking:
             self.cur_time_string = str(datetime.timedelta(seconds=(round(self.cur_time, 0))))  # update timer
-            if (self.tab_num == 1):
+            if self.tab_num == 1:
                 self.current_marker_count = len(MM.markerList)
                 self.update_table()
                 self.prev_marker_count = self.current_marker_count
-            if (self.tab_num == 4):
+            if self.tab_num == 4:
                 self.update_graph()
 
-        if (self.tab_num == 3):
+        if self.tab_num == 3:
             self.bulb_value = self.cur_value
 
         self.prev_value = self.cur_value
@@ -139,11 +129,11 @@ class MarkerWidget(BoxLayout):
             self.plot.points.append((ends, marker['value']))
             self.plot.points.append((ends, 0))
 
-        self.xmax = round((MM.getCurTime() - self.restart_time) / 1000, 0)
+        self.xmax = round((MM.get_cur_time() - self.restart_time) / 1000, 0)
 
     def led_state(self, value, bit):
         bit_string = '{:08b}'.format(int(value))  # format value as 8-bit string
-        return (int(bit_string[-(bit + 1)]) == 1)
+        return int(bit_string[-(bit + 1)]) == 1
 
     def update_table(self):
         new_markers = []
@@ -152,7 +142,7 @@ class MarkerWidget(BoxLayout):
                              'start': str((curMark['startTime'] - self.restart_time) / 1000),
                              'end': str((curMark['endTime'] - self.restart_time) / 1000),
                              'duration': str((curMark['duration']) / 1000),
-                             'occurences': str(curMark['occurence'])
+                             'occurrences': str(curMark['occurrence'])
                              }]
         self.rv.data = tableHeader + new_markers + self.rv.data[1:]
 
@@ -160,14 +150,14 @@ class MarkerWidget(BoxLayout):
         table = []
 
         for idx in range(0, 256):
-            if MM.getMarkerOccurence(idx) is not None:
+            if MM.get_marker_occurrence(idx) is not None:
                 table = table + [{'value': str(idx),
-                                  'occurences': str(MM.getMarkerOccurence(idx))
+                                  'occurrences': str(MM.get_marker_occurrence(idx))
                                   }]
         self.rv2.data = summaryHeader + table
 
     def output_marker(self, mvalue):
-        MO.sendMarker(int(mvalue))
+        MO.send_marker(int(mvalue))
 
     def switch_mode(self, mode, collapsed):
         if mode == 'input' and collapsed == False:
@@ -179,7 +169,7 @@ class MarkerWidget(BoxLayout):
 
 class MarkerBoxApp(App):
     def on_stop(self):
-        MM.stopTracking()
+        MM.stop_tracking()
         MM.kill()
 
     def build(self):
@@ -191,6 +181,6 @@ if __name__ == "__main__":
         MarkerBoxApp().run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt received, shutting down...")
-        MM.stopTracking()
+        MM.stop_tracking()
         MM.kill()
         sys.exit(0)

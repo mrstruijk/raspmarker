@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
+
 # pi_marker_sender.py
 
+import platform
 import sys
 import time
-import platform
 
 onRPi = platform.system() == "Linux"
 
 if onRPi:
-    from gpiozero import OutputDevice
     from gpiozero import OutputDevice
     from gpiozero.pins.pigpio import PiGPIOFactory
 else:
@@ -16,7 +16,6 @@ else:
 
 MARKER_PINS = [21, 20, 16, 12, 7, 8, 25, 24]  # bit 0 to bit 7
 pins = {pin: None for pin in MARKER_PINS}
-
 
 
 def setup_gpio():

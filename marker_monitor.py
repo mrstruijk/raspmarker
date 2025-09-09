@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Nov  4 19:51:39 2018
-
-@author: Elio
-"""
+# marker_monitor.py
 
 import platform
 import random
@@ -21,12 +16,12 @@ else:
     from mock_gpiozero import MockInputDevice as InputDevice, MockPiGPIOFactory as PiGPIOFactory
 
 
-# Class for monitoring markers recieved on logic (LPT/TTL) ports.
+# Class for monitoring markers received on logic (LPT/TTL) ports.
 class MarkerMonitor(threading.Thread):
 
-    def __init__(self, test_markers, \
-                 ports=[21, 20, 16, 12, 7, 8, 25, 24], \
-                 pollInterval_ms=1 \
+    def __init__(self, test_markers,
+                 ports=[21, 20, 16, 12, 7, 8, 25, 24],
+                 pollInterval_ms=1
                  ):
         # Constructor.
         super().__init__()
@@ -47,14 +42,14 @@ class MarkerMonitor(threading.Thread):
 
         self.isAlive = True
 
-        # List and dictionary to track markers and their occurences:
+        # List and dictionary to track markers and their occurrences:
         self.markerList = list()
         self.markerOccurDict = {}
 
         # Callbacks to be executed when the value changes:
         self.valueChangeCallbacks = {}
 
-        # Tarcking parameters:
+        # Tracking parameters:
         self.lastValue = 0
         self.curValue = 0
 
@@ -70,8 +65,8 @@ class MarkerMonitor(threading.Thread):
     def run(self):
 
         # Initialize vars:
-        markerBeingRecieved = {}
-        self.lastValue = self.readCurValue()
+        marker_being_received = {}
+        self.lastValue = self.read_cur_value()
         self.startTime = timing.millis()
 
         # TODO: make lastValue and curValue local, not dyn props.
@@ -79,7 +74,7 @@ class MarkerMonitor(threading.Thread):
         while self.isAlive:
 
             # Read out latest marker value:
-            self.curValue = self.readCurValue()
+            self.curValue = self.read_cur_value()
 
             if self.trackMarkers:
                 # If tracking is enabled:
@@ -92,22 +87,22 @@ class MarkerMonitor(threading.Thread):
                     # RUN NEW VALUE CALLBACKS
                     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-                    if markerBeingRecieved != {}:
-                        # If a marker was being recieved and the value changed,
+                    if marker_being_received != {}:
+                        # If a marker was being received and the value changed,
                         # end the marker, and push it into the marker list:
 
-                        markerBeingRecieved["endTime"] = self.getCurTime()
-                        self.addNewMarker(**markerBeingRecieved)
+                        marker_being_received["endTime"] = self.get_cur_time()
+                        self.add_new_marker(**marker_being_received)
 
                         # Reset current marker:
-                        markerBeingRecieved = {}
+                        marker_being_received = {}
 
                     if self.curValue != 0:
                         # If the new value is not zero, create a new marker:
 
                         # Make new marker:
-                        markerBeingRecieved = {'value': self.curValue, \
-                                               'startTime': self.getCurTime()}
+                        marker_being_received = {'value': self.curValue,
+                                                 'startTime': self.get_cur_time()}
 
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                         # RUN NEW MARKER CALLBACKS
@@ -116,16 +111,16 @@ class MarkerMonitor(threading.Thread):
             # Sleep until the next poll:
             time.sleep(self.pollInterval_ms / 1000.0)
 
-    def getCurTime(self):
+    def get_cur_time(self):
         return round(timing.millis() - self.startTime)
 
-    def startTracking(self):
+    def start_tracking(self):
         self.trackMarkers = True
         self.startTime = timing.millis()
-        self.resetMarkers()
+        self.reset_markers()
         pass
 
-    def stopTracking(self):
+    def stop_tracking(self):
         self.trackMarkers = False
         pass
 
@@ -133,65 +128,52 @@ class MarkerMonitor(threading.Thread):
         self.isAlive = False
         pass
 
-    def resetMarkers(self):
+    def reset_markers(self):
         self.markerList = list()
         self.markerOccurDict = {}
         pass
 
-    def addNewMarker(self, value, startTime, endTime):
-        ''' Adds a new marker to the marker list. '''
+    def add_new_marker(self, value, start_time, end_time):
+        """ Adds a new marker to the marker list. """
 
-        # Calculate the occurence:
-        if self.markerOccurDict.get(value) == None:
-            occurence = 1
+        # Calculate the occurrence:
+        if self.markerOccurDict.get(value) is None:
+            occurrence = 1
         else:
-            occurence = self.markerOccurDict.get(value) + 1
+            occurrence = self.markerOccurDict.get(value) + 1
 
-        # Save the current occurence so that it can be reasily tracked:
-        self.markerOccurDict[value] = occurence
+        # Save the current occurrence so that it can be easily tracked:
+        self.markerOccurDict[value] = occurrence
 
         # Make marker, and append it to the list:
-        self.markerList.append({ \
-            'value': value, \
-            'startTime': startTime, \
-            'endTime': endTime, \
-            'duration': endTime - startTime, \
-            'occurence': occurence})
+        self.markerList.append({
+            'value': value,
+            'startTime': start_time,
+            'endTime': end_time,
+            'duration': end_time - start_time,
+            'occurrence': occurrence})
 
-    def getMarkerOccurence(self, value):
+    def get_marker_occurrence(self, value):
         return self.markerOccurDict.get(value)
 
-    def readCurValue(self):
-        # if self.test_markers == 1 and onRPi:
+    def read_cur_value(self):
         if self.test_markers == 1:
-            # curMark = 0
-
-            # for i, port in enumerate(self.ports):
-            #     if GPIO.input(port):
-            #         curMark = curMark + 2 ** i
-            # return curMark
-
-            # return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.ports)])
             val = sum([int(dev.value) * (2 ** i) for i, dev in enumerate(self.ports)])
             return val
         else:
-            N = 10  # Make this dependent on the polling interval.
+            mock_polling_interval = 10  # Make this dependent on the polling interval.
 
             # Have a 1 in N chance to change the current marker:
-            curMark = self.valueSpoofer
-            if random.randint(0, N) == 1:
+            cur_mark = self.valueSpoofer
+            if random.randint(0, mock_polling_interval) == 1:
 
-                # Have a 1 in N/4 chance to go to a non zero marker:
-                if random.randint(0, round(N / 4)) == 1:
-                    curMark = random.randint(0, 255)
+                # Have a 1 in N/4 chance to go to a non-zero marker:
+                if random.randint(0, round(mock_polling_interval / 4)) == 1:
+                    cur_mark = random.randint(0, 255)
                 else:
-                    curMark = 0
-            # if self.trackMarkers:
-            # print("TRACK: %.2f: %i." % (self.getCurTime(),curMark))
-            # else:
-            #    #print("%.2f: %i." % (self.getCurTime(),curMark))
-            self.valueSpoofer = curMark
-            return curMark
+                    cur_mark = 0
+            self.valueSpoofer = cur_mark
+            return cur_mark
 
         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         # MAKE GENERATOR TO RETURN PARSED MARKERS!

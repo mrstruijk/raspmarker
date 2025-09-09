@@ -1,6 +1,7 @@
 # mock_gpiozero.py
 import threading
 
+
 class PinRegistry:
     """Singleton registry for pin states"""
     _instance = None
@@ -63,6 +64,7 @@ class MockOutputDevice:
 
 class MockPiGPIOFactory:
     """Mock factory for gpiozero PiGPIOFactory."""
+
     def __init__(self):
         self.registry = PinRegistry()
         print("[MOCK gpiozero] PiGPIOFactory initialized")

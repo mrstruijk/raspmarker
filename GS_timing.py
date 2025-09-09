@@ -44,9 +44,9 @@ VERSION = '0.2.0'
 # FUNCTIONS:
 # -------------------------------------------------------------------
 # OS-specific low-level timing functions:
-if (os.name == 'nt'):  # for Windows:
+if os.name == 'nt':  # for Windows:
     def micros():
-        "return a timestamp in microseconds (us)"
+        """return a timestamp in microseconds (us)"""
         tics = ctypes.c_int64()
         freq = ctypes.c_int64()
 
@@ -60,7 +60,7 @@ if (os.name == 'nt'):  # for Windows:
 
 
     def millis():
-        "return a timestamp in milliseconds (ms)"
+        """return a timestamp in milliseconds (ms)"""
         tics = ctypes.c_int64()
         freq = ctypes.c_int64()
 
@@ -72,7 +72,7 @@ if (os.name == 'nt'):  # for Windows:
         t_ms = tics.value * 1e3 / freq.value
         return t_ms
 
-elif (os.name == 'posix'):  # for Linux:
+elif os.name == 'posix':  # for Linux:
 
     # Constants:
     CLOCK_MONOTONIC_RAW = 4  # see <linux/time.h> here: https://github.com/torvalds/linux/blob/master/include/uapi/linux/time.h
@@ -100,7 +100,7 @@ elif (os.name == 'posix'):  # for Linux:
 
 
     def monotonic_time():
-        "return a timestamp in seconds (sec)"
+        """return a timestamp in seconds (sec)"""
         t = timespec()
         # (Note that clock_gettime() returns 0 for success, or -1 for failure, in
         # which case errno is set appropriately)
@@ -113,28 +113,28 @@ elif (os.name == 'posix'):  # for Linux:
 
 
     def micros():
-        "return a timestamp in microseconds (us)"
+        """return a timestamp in microseconds (us)"""
         return monotonic_time() * 1e6  # us
 
 
     def millis():
-        "return a timestamp in milliseconds (ms)"
+        """return a timestamp in milliseconds (ms)"""
         return monotonic_time() * 1e3  # ms
 
 
 # Other timing functions:
 def delay(delay_ms):
-    "delay for delay_ms milliseconds (ms)"
+    """delay for delay_ms milliseconds (ms)"""
     t_start = millis()
-    while (millis() - t_start < delay_ms):
+    while millis() - t_start < delay_ms:
         pass  # do nothing
     return
 
 
 def delayMicroseconds(delay_us):
-    "delay for delay_us microseconds (us)"
+    """delay for delay_us microseconds (us)"""
     t_start = micros()
-    while (micros() - t_start < delay_us):
+    while micros() - t_start < delay_us:
         pass  # do nothing
     return
 
@@ -142,9 +142,10 @@ def delayMicroseconds(delay_us):
 # -------------------------------------------------------------------
 # EXAMPLES:
 # -------------------------------------------------------------------
-# Only executute this block of code if running this module directly,
+# Only execute this block of code if running this module directly,
 # *not* if importing it
 # -see here: http://effbot.org/pyfaq/tutor-what-is-if-name-main-for.htm
+
 if __name__ == "__main__":  # if running this module as a stand-alone program
 
     # print loop execution time 100 times, using micros()

@@ -1,4 +1,4 @@
-# MarkerOut_gpiozero.py
+# marker_out.py
 import platform
 
 onRPi = platform.system() == "Linux"
@@ -7,7 +7,7 @@ if onRPi:
     from gpiozero import OutputDevice
     from gpiozero.pins.pigpio import PiGPIOFactory
 else:
-    from mock_gpiozero import MockOutputDevice as OutputDevice
+    from mock_gpiozero import MockOutputDevice as OutputDevice, MockPiGPIOFactory as PiGPIOFactory
 
 PIN_DATA = 26
 PIN_LATCH = 19
@@ -22,7 +22,7 @@ class MarkerOut:
         self.latch = OutputDevice(PIN_LATCH, pin_factory=self.factory)
         self.clock = OutputDevice(PIN_CLOCK, pin_factory=self.factory)
 
-    def sendMarker(self, value):
+    def send_marker(self, value):
         """Send a marker by setting the 8-bit value on the pins."""
         self.latch.off()
         for bit in range(8):
