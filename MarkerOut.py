@@ -1,39 +1,34 @@
-# MarkerOut.py
-
+# MarkerOut_gpiozero.py
 import platform
 
 onRPi = platform.system() == "Linux"
 
 if onRPi:
-    import RPi.GPIO as GPIO
+    from gpiozero import OutputDevice
+    from gpiozero.pins.pigpio import PiGPIOFactory
 else:
-    from mock_gpio import GPIO
-    GPIO = GPIO()  # instantiate the mock
-
-GPIO.setmode(GPIO.BCM)
+    from mock_gpiozero import MockOutputDevice as OutputDevice
 
 PIN_DATA = 26
 PIN_LATCH = 19
 PIN_CLOCK = 13
 
-if not onRPi:
-    GPIO.setup(PIN_DATA, GPIO.OUT)
-    GPIO.setup(PIN_LATCH, GPIO.OUT)
-    GPIO.setup(PIN_CLOCK, GPIO.OUT)
-
 
 class MarkerOut:
     def __init__(self):
-        super().__init__()
+        self.factory = PiGPIOFactory() if onRPi else None
+
+        self.data = OutputDevice(PIN_DATA, pin_factory=self.factory)
+        self.latch = OutputDevice(PIN_LATCH, pin_factory=self.factory)
+        self.clock = OutputDevice(PIN_CLOCK, pin_factory=self.factory)
 
     def sendMarker(self, value):
-        if onRPi:
-            GPIO.output(PIN_LATCH, 0)
-            for x in range(8):
-                GPIO.output(PIN_DATA, (value >> x) & 1)
-                GPIO.output(PIN_CLOCK, 1)
-                GPIO.output(PIN_CLOCK, 0)
-            GPIO.output(PIN_LATCH, 1)
-        else:
-            # Optional: log the value in mock mode
+        """Send a marker by setting the 8-bit value on the pins."""
+        self.latch.off()
+        for bit in range(8):
+            self.data.value = (value >> bit) & 1
+            self.clock.on()
+            self.clock.off()
+        self.latch.on()
+        if not onRPi:
             print(f"[MOCK MarkerOut] sendMarker({value})")

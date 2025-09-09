@@ -10,10 +10,8 @@ Created on Fri Nov 16 22:43:49 2018
 # Config.set('graphics', 'left', 0)
 # Config.set('graphics', 'top',  0)
 
-import sys
-
 import datetime
-import threading
+import sys
 import time
 
 from kivy.app import App
@@ -178,6 +176,7 @@ class MarkerWidget(BoxLayout):
             self.event.cancel()
         return True
 
+
 class MarkerBoxApp(App):
     def on_stop(self):
         MM.stopTracking()
@@ -188,4 +187,10 @@ class MarkerBoxApp(App):
 
 
 if __name__ == "__main__":
-    MarkerBoxApp().run()
+    try:
+        MarkerBoxApp().run()
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt received, shutting down...")
+        MM.stopTracking()
+        MM.kill()
+        sys.exit(0)

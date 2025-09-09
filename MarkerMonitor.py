@@ -14,13 +14,11 @@ onRPi = platform.system() == "Linux"
 
 if onRPi:
     import GS_timing as timing
-    import RPi.GPIO as GPIO
+    from gpiozero import InputDevice
+    from gpiozero.pins.pigpio import PiGPIOFactory
 else:
     import mock_GS_timing as timing
-    from mock_gpio import GPIO
-    GPIO = GPIO()  # This now gets the singleton instance
-
-GPIO.setmode(GPIO.BCM)
+    from mock_gpiozero import MockInputDevice as InputDevice, MockPiGPIOFactory as PiGPIOFactory
 
 
 # Class for monitoring markers recieved on logic (LPT/TTL) ports.
@@ -33,12 +31,9 @@ class MarkerMonitor(threading.Thread):
         # Constructor.
         super().__init__()
 
-        self.test_markers = test_markers
+        self.factory = PiGPIOFactory()  # connect to pigpio daemon
 
-        # Set all ports as GPIO inputs
-        #if onRPi:
-        for port in ports:
-            GPIO.setup(port, GPIO.IN)
+        self.test_markers = test_markers
 
         # Marker params:
         self.pollInterval_ms = pollInterval_ms
@@ -68,6 +63,9 @@ class MarkerMonitor(threading.Thread):
 
         # Variable for faking a marker signal:
         self.valueSpoofer = 0
+
+        # Initialize ports via factorio
+        self.ports = [InputDevice(p, pin_factory=self.factory) for p in ports]
 
     def run(self):
 
@@ -164,7 +162,7 @@ class MarkerMonitor(threading.Thread):
         return self.markerOccurDict.get(value)
 
     def readCurValue(self):
-        #if self.test_markers == 1 and onRPi:
+        # if self.test_markers == 1 and onRPi:
         if self.test_markers == 1:
             # curMark = 0
 
@@ -172,7 +170,10 @@ class MarkerMonitor(threading.Thread):
             #     if GPIO.input(port):
             #         curMark = curMark + 2 ** i
             # return curMark
-            return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.ports)])
+
+            # return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.ports)])
+            val = sum([int(dev.value) * (2 ** i) for i, dev in enumerate(self.ports)])
+            return val
         else:
             N = 10  # Make this dependent on the polling interval.
 
