@@ -1,5 +1,4 @@
-MarkerBox 
-
+MarkerBox
 
 Python 3.7.3
 
@@ -9,9 +8,9 @@ kivy-garden.graph===0.4.dev0
 
 RPi.GPIO ... (when using Marker Input and Raspberry Pi)
 
-Run: 
+Run:
 
-When using random markers: 
+When using random markers:
 
 python kivyGUI.py 0
 
