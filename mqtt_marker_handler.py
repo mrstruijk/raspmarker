@@ -1,8 +1,7 @@
-# mqtt_marker_handler.py
-
 import sys
 import threading
 import paho.mqtt.client as mqtt
+from kivy.clock import Clock
 
 class MQTTMarkerHandler:
     def __init__(self, marker_widget, broker="192.168.1.40", port=1883,
@@ -43,8 +42,8 @@ class MQTTMarkerHandler:
             payload = msg.payload.decode("utf-8").strip()
             marker_val = int(payload)
             if 0 <= marker_val <= 255:
-                self.marker_widget.output_marker(marker_val)
-                #print(f"Output marker: {marker_val}")
+                # Schedule on main thread
+                Clock.schedule_once(lambda dt: self.marker_widget.output_marker(marker_val))
             else:
                 print(f"Payload {marker_val} out of range 0-255")
         except ValueError:

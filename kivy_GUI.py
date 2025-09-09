@@ -3,6 +3,7 @@
 import datetime
 import sys
 import time
+import threading
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -13,7 +14,9 @@ from kivy_garden.graph import MeshLinePlot
 
 import marker_monitor as m
 import marker_out
+
 from mqtt_marker_handler import MQTTMarkerHandler
+
 
 INTERVAL = 0.1  # clock interval in seconds
 
@@ -51,8 +54,17 @@ class MarkerWidget(BoxLayout):
     color = ListProperty([1, 0, 0, 1])
 
     def __init__(self, **kwargs):  # initialize marker widget
-        super(MarkerWidget, self).__init__(**kwargs)
-        mqtt_handler = MQTTMarkerHandler(marker_widget=self)
+        super().__init__(**kwargs)
+
+        # Start MQTT handler in background thread
+        self.mqtt_handler_thread = threading.Thread(
+            target=self.start_mqtt,
+            daemon=True
+        )
+        self.mqtt_handler_thread.start()
+
+        self.tab_num = 1
+        self.tracking = False
         self.tab_num = 1
         self.tracking = False
         self.cur_time = 0
@@ -170,6 +182,17 @@ class MarkerWidget(BoxLayout):
             self.event.cancel()
             #self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)  #
         return True
+
+    def start_mqtt(self):
+        # Pass self to MQTT handler so it can call self.output_marker
+        handler = MQTTMarkerHandler(marker_widget=self)
+        #handler.loop_forever()
+
+    def output_marker(self, mvalue):
+        # This is always safe to call from Kivy thread
+        MO.send_marker(int(mvalue))
+        self.cur_value = int(mvalue)  # update GUI
+        self.last_marker = f"Last: {mvalue} (sent via MQTT)"
 
 
 class MarkerBoxApp(App):
