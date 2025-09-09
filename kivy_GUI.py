@@ -13,6 +13,7 @@ from kivy_garden.graph import MeshLinePlot
 
 import marker_monitor as m
 import marker_out
+from mqtt_marker_handler import MQTTMarkerHandler
 
 INTERVAL = 0.1  # clock interval in seconds
 
@@ -20,7 +21,7 @@ Window.show_cursor = True
 # Window.borderless = True # not working ?
 Window.size = (800, 480)
 
-arg = 1  # 0 = random values, 1 = real input from GPIO
+arg = 0  # 1 = random values, 0 = real input from GPIO
 if len(sys.argv) > 1:
     arg = int(sys.argv[1])
 
@@ -51,6 +52,7 @@ class MarkerWidget(BoxLayout):
 
     def __init__(self, **kwargs):  # initialize marker widget
         super(MarkerWidget, self).__init__(**kwargs)
+        mqtt_handler = MQTTMarkerHandler(marker_widget=self)
         self.tab_num = 1
         self.tracking = False
         self.cur_time = 0
@@ -155,6 +157,7 @@ class MarkerWidget(BoxLayout):
                                   'occurrences': str(MM.get_marker_occurrence(idx))
                                   }]
         self.rv2.data = summaryHeader + table
+
 
     def output_marker(self, mvalue):
         MO.send_marker(int(mvalue))

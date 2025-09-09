@@ -16,10 +16,11 @@ else:
     from mock_gpiozero import MockInputDevice as InputDevice, MockPiGPIOFactory as PiGPIOFactory
 print(f"Marker_monitor is on Pi: {onRPi}")
 
+
 # Class for monitoring markers received on logic (LPT/TTL) ports.
 class MarkerMonitor(threading.Thread):
 
-    def __init__(self, test_markers,
+    def __init__(self, random_test_markers,
                  ports=[21, 20, 16, 12, 7, 8, 25, 24],
                  pollInterval_ms=1
                  ):
@@ -28,7 +29,7 @@ class MarkerMonitor(threading.Thread):
 
         self.factory = PiGPIOFactory()  # connect to pigpio daemon
 
-        self.test_markers = test_markers
+        self.random_test_markers = random_test_markers
 
         # Marker params:
         self.pollInterval_ms = pollInterval_ms
@@ -156,10 +157,10 @@ class MarkerMonitor(threading.Thread):
         return self.markerOccurDict.get(value)
 
     def read_cur_value(self):
-        if self.test_markers == 1:
+        if self.random_test_markers == 0:
             val = sum([int(dev.value) * (2 ** i) for i, dev in enumerate(self.ports)])
             return val
-        else:
+        if self.random_test_markers == 1:
             mock_polling_interval = 10  # Make this dependent on the polling interval.
 
             # Have a 1 in N chance to change the current marker:
@@ -173,6 +174,9 @@ class MarkerMonitor(threading.Thread):
                     cur_mark = 0
             self.valueSpoofer = cur_mark
             return cur_mark
+        else:
+            print("Unexpected value. 1 = use random markers (for testing), 0 = use real markers.")
+            return None
 
         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         # MAKE GENERATOR TO RETURN PARSED MARKERS!
