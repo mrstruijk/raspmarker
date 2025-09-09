@@ -10,7 +10,7 @@ from pin_marker_sender import PinMarkerSender
 
 
 class MQTTMarkerHandler:
-    def __init__(self, broker="localhost", port=1883, username="SOLO", password="SOLO1B11", topic="raspmarker"):
+    def __init__(self, broker="192.168.1.40", port=1883, username="SOLO", password="SOLO1B11", topic="raspmarker"):
         self.sender = PinMarkerSender()
         self.topic = topic
         self.client = mqtt.Client(protocol=mqtt.MQTTv311, callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
@@ -23,12 +23,12 @@ class MQTTMarkerHandler:
             print(f"\nCould not connect to MQTT broker at {broker}:{port}. Will quit.")
             sys.exit(1)
 
-    def on_connect(self, client, userdata, flags, rc):
-        if rc == 0:
+    def on_connect(self, client, userdata, flags, reason_code, properties=None):
+        if reason_code == 0:
             print(f"Connected to MQTT broker, subscribing to '{self.topic}'")
             client.subscribe(self.topic)
         else:
-            print(f"Failed to connect, return code {rc}")
+            print(f"Failed to connect, return code {reason_code}")
 
     def on_message(self, client, userdata, msg):
         try:
