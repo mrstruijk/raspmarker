@@ -91,7 +91,7 @@ class MarkerMonitor(threading.Thread):
                         # If a marker was being received and the value changed,
                         # end the marker, and push it into the marker list:
 
-                        marker_being_received["endTime"] = self.get_cur_time()
+                        marker_being_received['end_time'] = self.get_cur_time()
                         self.add_new_marker(**marker_being_received)
 
                         # Reset current marker:
@@ -101,8 +101,7 @@ class MarkerMonitor(threading.Thread):
                         # If the new value is not zero, create a new marker:
 
                         # Make new marker:
-                        marker_being_received = {'value': self.curValue,
-                                                 'startTime': self.get_cur_time()}
+                        marker_being_received = {'value': self.curValue, 'start_time': self.get_cur_time()}
 
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                         # RUN NEW MARKER CALLBACKS
