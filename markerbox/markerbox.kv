@@ -1,5 +1,5 @@
 #:kivy 1.11.0
-#:import MeshLinePlot kivy_garden.graph.MeshLinePlot
+#:import MeshLinePlot kivy.garden.graph.MeshLinePlot
 
 #:set background_color [0.9, 0.9, 0.9]
 #:set label_text_color [0.2, 0.2, 0.2, 1]
@@ -14,7 +14,7 @@
     start: '' 
     end: ''
     duration: '' 
-    occurrences: ''
+    occurences: ''
 
     GridLayout:
         cols: 5
@@ -36,12 +36,12 @@
             text: root.duration          
             markup: True
         Label:
-            text: root.occurrences
+            text: root.occurences  
             markup: True
 
 <SummaryRow@BoxLayout>:
     value: ''
-    occurrences: ''
+    occurences: ''
     GridLayout:
         cols: 2
         rows: 1
@@ -53,7 +53,7 @@
             text: root.value
             markup: True
         Label:
-            text: root.occurrences
+            text: root.occurences  
             markup: True
 
 <MarkerWidget>:
