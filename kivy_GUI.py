@@ -160,6 +160,7 @@ class MarkerWidget(BoxLayout):
 
 
     def output_marker(self, mvalue):
+        print("Outputting marker " + str(mvalue))
         MO.send_marker(int(mvalue))
 
     def switch_mode(self, mode, collapsed):
@@ -167,6 +168,7 @@ class MarkerWidget(BoxLayout):
             self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)  #
         else:
             self.event.cancel()
+            #self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)  #
         return True
 
 

@@ -44,7 +44,7 @@ class MQTTMarkerHandler:
             marker_val = int(payload)
             if 0 <= marker_val <= 255:
                 self.marker_widget.output_marker(marker_val)
-                print(f"Output marker: {marker_val}")
+                #print(f"Output marker: {marker_val}")
             else:
                 print(f"Payload {marker_val} out of range 0-255")
         except ValueError:
