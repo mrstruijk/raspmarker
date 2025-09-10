@@ -15,10 +15,9 @@ onRPi = (platform.system() == 'Linux')
 
 if onRPi:
     import RPi.GPIO as GPIO
-    import GS_timing as timing
-
     GPIO.setmode(GPIO.BCM)
 
+import GS_timing as timing
 
 
 class MarkerMonitor(threading.Thread):
@@ -172,7 +171,7 @@ class MarkerMonitor(threading.Thread):
 
     def readCurValue(self):
         if self.use_random_markers == 0 and onRPi:
-            return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.input_pins)])
+                return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.input_pins)])
         else: # Use random markers
             N = 10  # Make this dependent on the polling interval.
 
@@ -186,6 +185,7 @@ class MarkerMonitor(threading.Thread):
                     curMark = 0
 
             self.valueSpoofer = curMark
+            print("Current value:", curMark)
             return curMark
 
         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

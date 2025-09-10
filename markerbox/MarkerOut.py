@@ -34,9 +34,9 @@ class MarkerOut:
                 GPIO.output(PIN_CLOCK, 1) # A quick high‑then‑low pulse on PIN_CLOCK (1 → 0) tells the shift register to read the data line and advance one position.
                 GPIO.output(PIN_CLOCK, 0)
             GPIO.output(PIN_LATCH, 1) # Latch high: copies the newly shifted byte from the shift register to its output pins, making the new pattern visible the attached hardware
+            print(f"Sending value {value} to the LPT attached hardware.")
         else:
-            print(f"Mock send_marker_to_lpt called on {self}")
-        print(f"Sending value {value} to the LPT attached hardware.")
+            print(f"Mock send_marker_to_lpt with value {value}.")
 
     def cleanup(self):
         if onRPi:
