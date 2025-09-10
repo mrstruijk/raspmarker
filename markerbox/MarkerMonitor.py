@@ -20,17 +20,21 @@ if onRPi:
     GPIO.setmode(GPIO.BCM)
 
 
+
 class MarkerMonitor(threading.Thread):
     """ Utility for monitoring markers received on logic (LPT/TTL) ports. These usually consists of markers from devices like Biopac/Biosemi that are being sent to the Pi """
 
-    def __init__(self, test_markers,
+    def start_thread(self):
+        self.start()
+
+    def __init__(self, use_random_markers,
                  input_pins=[21, 20, 16, 12, 7, 8, 25, 24],
                  pollInterval_ms=1
                  ):
         # Constructor.
         super().__init__()
 
-        self.test_markers = test_markers
+        self.use_random_markers = use_random_markers
 
         # Set all ports as GPIO inputs
         if onRPi:
@@ -51,6 +55,7 @@ class MarkerMonitor(threading.Thread):
 
         # List and dictionary to track markers and their occurrences:
         self.markerList = list()
+        self.markerList = []
         self.markerOccurDict = {}
 
         # Callbacks to be executed when the value changes:
@@ -65,6 +70,11 @@ class MarkerMonitor(threading.Thread):
 
         # Variable for faking a marker signal:
         self.valueSpoofer = 0
+
+        # Start!
+        self.start_thread()
+        self.startTracking()
+
 
     def run(self):
 
@@ -161,10 +171,9 @@ class MarkerMonitor(threading.Thread):
         return self.markerOccurDict.get(value)
 
     def readCurValue(self):
-        if self.test_markers == 1 and onRPi:
-
+        if self.use_random_markers == 0 and onRPi:
             return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.input_pins)])
-        else:
+        else: # Use random markers
             N = 10  # Make this dependent on the polling interval.
 
             # Have a 1 in N chance to change the current marker:

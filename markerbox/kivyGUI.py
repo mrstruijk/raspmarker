@@ -30,12 +30,12 @@ Window.show_cursor = False
 # Window.borderless = True # not working ?
 Window.size = (800, 480)
 
-MM = m.MarkerMonitor(int(sys.argv[1]))
-MM.markerList = []
-MM.start()
-MM.startTracking()
+# MM = m.MarkerMonitor(int(sys.argv[1]))
+# MM.markerList = []
+# MM.start()
+# MM.startTracking()
 
-MO = MarkerOut.MarkerOut()
+#MO = MarkerOut.MarkerOut()
 
 tableHeader = [{'value': '[b]Value[/b]', 'start': '[b]Start time (s)[/b]', 'end': '[b]End time (s)[/b]', 'duration': '[b]Duration (s)[/b]', 'occurrences': '[b]Occurrences[/b]'}]
 summaryHeader = [{'value': '[b]Value[/b]', 'occurrences': '[b]Occurrences[/b]'}]
@@ -54,8 +54,10 @@ class MarkerWidget(BoxLayout):
 
     color = ListProperty([1, 0, 0, 1])
 
-    def __init__(self, **kwargs):  # initialize marker widget
+    def __init__(self, marker_monitor, marker_out, **kwargs):  # initialize marker widget
         super(MarkerWidget, self).__init__(**kwargs)
+        self.marker_monitor = marker_monitor
+        self.marker_out = marker_out
         self.tab_num = 1
         self.tracking = False
         self.cur_time = 0
@@ -70,14 +72,14 @@ class MarkerWidget(BoxLayout):
         self.plot = MeshLinePlot(color=[0.2, 0.8, 1, 1])  # graph
         # self.xmax = 0 # set graph x-axis range
         self.marker_graph.add_plot(self.plot)
-        MM.resetMarkers()
+        self.marker_monitor.resetMarkers()
         # check marker thread every 100 milliseconds
         self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)
 
     def switch_callback(self, switchValue):
         if switchValue:  # switched marker analysis ON
             self.tracking = True
-            MM.resetMarkers()  # clear markerList
+            self.marker_monitor.resetMarkers()  # clear markerList
             self.rv.data = []  # clear marker analysis table
             self.rv2.data = []  # clear marker summary table
             self.plot.points = []  # clear graph
@@ -85,7 +87,7 @@ class MarkerWidget(BoxLayout):
             self.current_marker_count = 0  # reset counters
             self.num_markers_plotted = 0  # reset counter for marker plot
             self.starttimer = time.time()  # set timers
-            self.restart_time = MM.getCurTime()  # set timers
+            self.restart_time = self.marker_monitor.getCurTime()  # set timers
 
         else:  # marker analysis OFF
             self.tracking = False
@@ -94,16 +96,16 @@ class MarkerWidget(BoxLayout):
             self.create_summary_table()
 
     def clock_callback(self, dt):
-        self.cur_value = MM.readCurValue()
+        self.cur_value = self.marker_monitor.readCurValue()
         self.cur_time = time.time() - self.starttimer
 
-        if len(MM.markerList) > 0:  # show latest marker
-            self.last_marker = "Last: " + str(MM.markerList[-1]['value']) + " (dur: " + str(MM.markerList[-1]['duration'] / 1000) + " s, occur: " + str(MM.markerList[-1]['occurrence']) + ")"
+        if len(self.marker_monitor.markerList) > 0:  # show latest marker
+            self.last_marker = "Last: " + str(self.marker_monitor.markerList[-1]['value']) + " (dur: " + str(self.marker_monitor.markerList[-1]['duration'] / 1000) + " s, occur: " + str(self.marker_monitor.markerList[-1]['occurrence']) + ")"
 
         if self.tracking:
             self.cur_time_string = str(datetime.timedelta(seconds=(round(self.cur_time, 0))))  # update timer
             if self.tab_num == 1:
-                self.current_marker_count = len(MM.markerList)
+                self.current_marker_count = len(self.marker_monitor.markerList)
                 self.update_table()
                 self.prev_marker_count = self.current_marker_count
             if self.tab_num == 4:
@@ -125,7 +127,7 @@ class MarkerWidget(BoxLayout):
 
     def update_graph(self):
         cur_markers_plotted = self.num_markers_plotted
-        for marker in MM.markerList[cur_markers_plotted:]:
+        for marker in self.marker_monitor.markerList[cur_markers_plotted:]:
             self.num_markers_plotted += 1
             starts = round((marker['startTime'] - self.restart_time) / 1000, 5)
             ends = round((marker['endTime'] - self.restart_time) / 1000, 5)
@@ -134,7 +136,7 @@ class MarkerWidget(BoxLayout):
             self.plot.points.append((ends, marker['value']))
             self.plot.points.append((ends, 0))
 
-        self.xmax = round((MM.getCurTime() - self.restart_time) / 1000, 0)
+        self.xmax = round((self.marker_monitor.getCurTime() - self.restart_time) / 1000, 0)
 
     def led_state(self, value, bit):
         bit_string = '{:08b}'.format(int(value))  # format value as 8-bit string
@@ -142,7 +144,7 @@ class MarkerWidget(BoxLayout):
 
     def update_table(self):
         new_markers = []
-        for idx, curMark in enumerate(MM.markerList[self.prev_marker_count:][::-1]):
+        for idx, curMark in enumerate(self.marker_monitor.markerList[self.prev_marker_count:][::-1]):
             new_markers += [{'value': str(curMark['value']),
                              'start': str((curMark['startTime'] - self.restart_time) / 1000),
                              'end': str((curMark['endTime'] - self.restart_time) / 1000),
@@ -155,15 +157,15 @@ class MarkerWidget(BoxLayout):
         table = []
 
         for idx in range(0, 256):
-            if MM.get_marker_occurrence(idx) is not None:
+            if self.marker_monitor.get_marker_occurrence(idx) is not None:
                 table = table + [{'value': str(idx),
-                                  'occurrences': str(MM.get_marker_occurrence(idx))
+                                  'occurrences': str(self.marker_monitor.get_marker_occurrence(idx))
                                   }]
         self.rv2.data = summaryHeader + table
 
     def send_marker_to_lpt(self, value: str):
         value = int(value)
-        MO.send_marker_to_lpt(value)
+        self.marker_out.send_marker_to_lpt(value)
 
     def switch_mode(self, mode, collapsed):
         if mode == 'input' and collapsed == False:
@@ -171,16 +173,3 @@ class MarkerWidget(BoxLayout):
         else:
             self.event.cancel()
         return True
-
-
-class MarkerBoxApp(App):
-    def on_stop(self):
-        MM.stopTracking()
-        MM.kill()
-
-    def build(self):
-        return MarkerWidget()
-
-
-if __name__ == "__main__":
-    MarkerBoxApp().run()
