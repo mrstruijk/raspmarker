@@ -185,7 +185,7 @@ class MarkerMonitor(threading.Thread):
                     curMark = 0
 
             self.valueSpoofer = curMark
-            print("Current value:", curMark)
+            # print("DEBUG: Current value:", curMark)
             return curMark
 
         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

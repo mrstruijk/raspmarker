@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# main.py
 
 """
 Bootstrap script for the MarkerBox application.
@@ -38,13 +39,14 @@ class MarkerBoxApp(KivyApp):
 # Run the program.
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
-    app = MarkerBoxApp()
-
     try:
-        app.run()
         marker_monitor.start_thread()
         marker_monitor.startTracking()
+        MarkerBoxApp().run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt received, shutting down...")
-        app.on_stop()
+    finally:
+        marker_monitor.stopTracking()
+        marker_monitor.kill()
+        marker_out.cleanup()
         sys.exit(0)

@@ -66,15 +66,23 @@ class MarkerWidget(BoxLayout):
         self.current_marker_count = 0
         self.num_markers_plotted = 0
         self.prev_value = 0
-        # self.cur_value = 0
-        self.initial_touch = 0  # initial touch position
+        self.initial_touch = 0
         self.starttimer = 0
-        self.plot = MeshLinePlot(color=[0.2, 0.8, 1, 1])  # graph
-        # self.xmax = 0 # set graph x-axis range
-        self.marker_graph.add_plot(self.plot)
+        self.plot = MeshLinePlot(color=[0.2, 0.8, 1, 1])
+        Clock.schedule_once(self._finish_init, 0)  # postpone adding the plot until after KV has assigned marker_graph
+
+    def _finish_init(self, dt):
+        # this runs after KV assigns marker_graph
+        try:
+            if self.marker_graph is not None:
+                self.marker_graph.add_plot(self.plot)
+        except Exception:
+            pass
         self.marker_monitor.resetMarkers()
-        # check marker thread every 100 milliseconds
+        # schedule update loop (keep a single schedule here)
         self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)
+        # schedule periodic summary table update
+        Clock.schedule_interval(lambda dt: self.create_summary_table(), 0.5)  # every 500 ms
 
     def switch_callback(self, switchValue):
         if switchValue:  # switched marker analysis ON
@@ -99,8 +107,10 @@ class MarkerWidget(BoxLayout):
         self.cur_value = self.marker_monitor.readCurValue()
         self.cur_time = time.time() - self.starttimer
 
-        if len(self.marker_monitor.markerList) > 0:  # show latest marker
-            self.last_marker = "Last: " + str(self.marker_monitor.markerList[-1]['value']) + " (dur: " + str(self.marker_monitor.markerList[-1]['duration'] / 1000) + " s, occur: " + str(self.marker_monitor.markerList[-1]['occurrence']) + ")"
+        if self.marker_monitor.markerList:
+            last = self.marker_monitor.markerList[-1]
+            # print("DEBUG marker:", last)
+            self.last_marker = f"Last: {last['value']} (dur: {last['duration'] / 1000} s, occur: {last['occurrence']})"
 
         if self.tracking:
             self.cur_time_string = str(datetime.timedelta(seconds=(round(self.cur_time, 0))))  # update timer
@@ -118,6 +128,9 @@ class MarkerWidget(BoxLayout):
 
     def switch_tab(self, tab_num):
         self.tab_num = tab_num
+        # if user switches to graph tab, force an immediate draw of any new markers
+        if self.tab_num == 4:
+            self.update_graph()
 
     def on_touch_down_graph(self, touch):
         self.initial_touch = touch.x
@@ -135,7 +148,7 @@ class MarkerWidget(BoxLayout):
             self.plot.points.append((starts, marker['value']))
             self.plot.points.append((ends, marker['value']))
             self.plot.points.append((ends, 0))
-
+            # print("DEBUG: appended to plot", self.plot.points[-4:])
         self.xmax = round((self.marker_monitor.getCurTime() - self.restart_time) / 1000, 0)
 
     def led_state(self, value, bit):
@@ -151,7 +164,13 @@ class MarkerWidget(BoxLayout):
                              'duration': str((curMark['duration']) / 1000),
                              'occurrences': str(curMark['occurrence'])
                              }]
-        self.rv.data = tableHeader + new_markers + self.rv.data[1:]
+        # ensure rv.data exists and keep its header if present
+        existing = getattr(self, 'rv', None)
+        if existing and hasattr(self.rv, 'data') and len(self.rv.data) > 0:
+            tail = self.rv.data[1:]  # preserve existing rows after header
+        else:
+            tail = []
+        self.rv.data = tableHeader + new_markers + tail
 
     def create_summary_table(self):
         table = []
