@@ -14,7 +14,7 @@
     start: '' 
     end: ''
     duration: '' 
-    occurences: ''
+    occurrences: ''
 
     GridLayout:
         cols: 5
@@ -36,12 +36,12 @@
             text: root.duration          
             markup: True
         Label:
-            text: root.occurences  
+            text: root.occurrences
             markup: True
 
 <SummaryRow@BoxLayout>:
     value: ''
-    occurences: ''
+    occurrences: ''
     GridLayout:
         cols: 2
         rows: 1
@@ -53,7 +53,7 @@
             text: root.value
             markup: True
         Label:
-            text: root.occurences  
+            text: root.occurrences
             markup: True
 
 <MarkerWidget>:
@@ -354,5 +354,5 @@
 
                 Button:
                     text: str(sum([int(b)*(2**i) for i, b in enumerate([bulb_0.active, bulb_1.active, bulb_2.active, bulb_3.active, bulb_4.active, bulb_5.active, bulb_6.active, bulb_7.active])]))
-                    on_press: root.output_marker(self.text)
+                    on_press: root.send_marker_to_lpt(self.text)
 

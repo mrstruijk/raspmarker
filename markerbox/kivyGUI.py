@@ -37,8 +37,8 @@ MM.startTracking()
 
 MO = MarkerOut.MarkerOut()
 
-tableHeader = [{'value': '[b]Value[/b]', 'start': '[b]Start time (s)[/b]', 'end': '[b]End time (s)[/b]', 'duration': '[b]Duration (s)[/b]', 'occurences': '[b]Occurences[/b]'}]
-summaryHeader = [{'value': '[b]Value[/b]', 'occurences': '[b]Occurences[/b]'}]
+tableHeader = [{'value': '[b]Value[/b]', 'start': '[b]Start time (s)[/b]', 'end': '[b]End time (s)[/b]', 'duration': '[b]Duration (s)[/b]', 'occurrences': '[b]Occurrences[/b]'}]
+summaryHeader = [{'value': '[b]Value[/b]', 'occurrences': '[b]Occurrences[/b]'}]
 
 
 class MarkerWidget(BoxLayout):
@@ -50,7 +50,7 @@ class MarkerWidget(BoxLayout):
     marker_graph = ObjectProperty(None)
     # current_time = round(MM.getCurTime()/1000,0)
     xmax = NumericProperty(0)
-    outputmarker = NumericProperty(42)
+    # outputmarker = NumericProperty(42)
 
     color = ListProperty([1, 0, 0, 1])
 
@@ -98,18 +98,18 @@ class MarkerWidget(BoxLayout):
         self.cur_time = time.time() - self.starttimer
 
         if len(MM.markerList) > 0:  # show latest marker
-            self.last_marker = "Last: " + str(MM.markerList[-1]['value']) + " (dur: " + str(MM.markerList[-1]['duration'] / 1000) + " s, occur: " + str(MM.markerList[-1]['occurence']) + ")"
+            self.last_marker = "Last: " + str(MM.markerList[-1]['value']) + " (dur: " + str(MM.markerList[-1]['duration'] / 1000) + " s, occur: " + str(MM.markerList[-1]['occurrence']) + ")"
 
         if self.tracking:
             self.cur_time_string = str(datetime.timedelta(seconds=(round(self.cur_time, 0))))  # update timer
-            if (self.tab_num == 1):
+            if self.tab_num == 1:
                 self.current_marker_count = len(MM.markerList)
                 self.update_table()
                 self.prev_marker_count = self.current_marker_count
-            if (self.tab_num == 4):
+            if self.tab_num == 4:
                 self.update_graph()
 
-        if (self.tab_num == 3):
+        if self.tab_num == 3:
             self.bulb_value = self.cur_value
 
         self.prev_value = self.cur_value
@@ -138,7 +138,7 @@ class MarkerWidget(BoxLayout):
 
     def led_state(self, value, bit):
         bit_string = '{:08b}'.format(int(value))  # format value as 8-bit string
-        return (int(bit_string[-(bit + 1)]) == 1)
+        return int(bit_string[-(bit + 1)]) == 1
 
     def update_table(self):
         new_markers = []
@@ -147,7 +147,7 @@ class MarkerWidget(BoxLayout):
                              'start': str((curMark['startTime'] - self.restart_time) / 1000),
                              'end': str((curMark['endTime'] - self.restart_time) / 1000),
                              'duration': str((curMark['duration']) / 1000),
-                             'occurences': str(curMark['occurence'])
+                             'occurrences': str(curMark['occurrence'])
                              }]
         self.rv.data = tableHeader + new_markers + self.rv.data[1:]
 
@@ -155,14 +155,15 @@ class MarkerWidget(BoxLayout):
         table = []
 
         for idx in range(0, 256):
-            if MM.getMarkerOccurence(idx) is not None:
+            if MM.get_marker_occurrence(idx) is not None:
                 table = table + [{'value': str(idx),
-                                  'occurences': str(MM.getMarkerOccurence(idx))
+                                  'occurrences': str(MM.get_marker_occurrence(idx))
                                   }]
         self.rv2.data = summaryHeader + table
 
-    def output_marker(self, mvalue):
-        MO.send_marker_to_raspmarker(int(mvalue))
+    def send_marker_to_lpt(self, value: str):
+        value = int(value)
+        MO.send_marker_to_lpt(value)
 
     def switch_mode(self, mode, collapsed):
         if mode == 'input' and collapsed == False:

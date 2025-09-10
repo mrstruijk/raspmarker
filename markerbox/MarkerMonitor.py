@@ -20,12 +20,12 @@ if onRPi:
     GPIO.setmode(GPIO.BCM)
 
 
-# Class for monitoring markers received on logic (LPT/TTL) ports.
 class MarkerMonitor(threading.Thread):
+    """ Utility for monitoring markers received on logic (LPT/TTL) ports. These usually consists of markers from devices like Biopac/Biosemi that are being sent to the Pi """
 
-    def __init__(self, test_markers, \
-                 ports=[21, 20, 16, 12, 7, 8, 25, 24], \
-                 pollInterval_ms=1 \
+    def __init__(self, test_markers,
+                 input_pins=[21, 20, 16, 12, 7, 8, 25, 24],
+                 pollInterval_ms=1
                  ):
         # Constructor.
         super().__init__()
@@ -34,12 +34,12 @@ class MarkerMonitor(threading.Thread):
 
         # Set all ports as GPIO inputs
         if onRPi:
-            for port in ports:
-                GPIO.setup(port, GPIO.IN)
+            for pin in input_pins:
+                GPIO.setup(pin, GPIO.IN)
 
         # Marker params:
         self.pollInterval_ms = pollInterval_ms
-        self.ports = ports
+        self.input_pins = input_pins
 
         # Flag to enable marker tracking. Markers will always be read, and the
         # curValue will always be updated when the thread is running.
@@ -105,7 +105,7 @@ class MarkerMonitor(threading.Thread):
                         # If the new value is not zero, create a new marker:
 
                         # Make new marker:
-                        markerBeingRecieved = {'value': self.curValue, \
+                        markerBeingRecieved = {'value': self.curValue,
                                                'startTime': self.getCurTime()}
 
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -138,10 +138,10 @@ class MarkerMonitor(threading.Thread):
         pass
 
     def addNewMarker(self, value, startTime, endTime):
-        ''' Adds a new marker to the marker list. '''
+        """ Adds a new marker to the marker list. """
 
         # Calculate the occurrence:
-        if self.markerOccurDict.get(value) == None:
+        if self.markerOccurDict.get(value) is None:
             occurrence = 1
         else:
             occurrence = self.markerOccurDict.get(value) + 1
@@ -150,41 +150,32 @@ class MarkerMonitor(threading.Thread):
         self.markerOccurDict[value] = occurrence
 
         # Make marker, and append it to the list:
-        self.markerList.append({ \
-            'value': value, \
-            'startTime': startTime, \
-            'endTime': endTime, \
-            'duration': endTime - startTime, \
+        self.markerList.append({
+            'value': value,
+            'startTime': startTime,
+            'endTime': endTime,
+            'duration': endTime - startTime,
             'occurrence': occurrence})
 
-    def getMarkerOccurence(self, value):
+    def get_marker_occurrence(self, value):
         return self.markerOccurDict.get(value)
 
     def readCurValue(self):
         if self.test_markers == 1 and onRPi:
-            # curMark = 0
 
-            # for i, port in enumerate(self.ports):
-            #     if GPIO.input(port):
-            #         curMark = curMark + 2 ** i
-            # return curMark
-            return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.ports)])
+            return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.input_pins)])
         else:
             N = 10  # Make this dependent on the polling interval.
 
             # Have a 1 in N chance to change the current marker:
             curMark = self.valueSpoofer
             if random.randint(0, N) == 1:
-
-                # Have a 1 in N/4 chance to go to a non zero marker:
+                # Have a 1 in N/4 chance to go to a non-zero marker:
                 if random.randint(0, round(N / 4)) == 1:
                     curMark = random.randint(0, 255)
                 else:
                     curMark = 0
-            # if self.trackMarkers:
-            # print("TRACK: %.2f: %i." % (self.getCurTime(),curMark))
-            # else:
-            #    #print("%.2f: %i." % (self.getCurTime(),curMark))
+
             self.valueSpoofer = curMark
             return curMark
 
