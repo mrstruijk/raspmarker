@@ -10,12 +10,12 @@ import random
 import threading
 import time
 
-import GS_timing as timing
 
 onRPi = (platform.system() == 'Linux')
 
 if onRPi:
     import RPi.GPIO as GPIO
+    import GS_timing as timing
 
     GPIO.setmode(GPIO.BCM)
 
@@ -72,8 +72,8 @@ class MarkerMonitor(threading.Thread):
         self.valueSpoofer = 0
 
         # Start!
-        self.start_thread()
-        self.startTracking()
+        # self.start_thread()
+        # self.startTracking()
 
 
     def run(self):

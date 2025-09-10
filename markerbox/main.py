@@ -42,6 +42,8 @@ if __name__ == "__main__":
 
     try:
         app.run()
+        marker_monitor.start_thread()
+        marker_monitor.startTracking()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt received, shutting down...")
         app.on_stop()

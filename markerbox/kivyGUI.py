@@ -26,7 +26,7 @@ import MarkerOut
 
 INTERVAL = 0.1  # clock interval in seconds
 
-Window.show_cursor = False
+Window.show_cursor = True
 # Window.borderless = True # not working ?
 Window.size = (800, 480)
 
