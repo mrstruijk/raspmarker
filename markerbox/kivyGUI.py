@@ -162,7 +162,7 @@ class MarkerWidget(BoxLayout):
         self.rv2.data = summaryHeader + table
 
     def output_marker(self, mvalue):
-        MO.sendMarker(int(mvalue))
+        MO.send_marker_to_raspmarker(int(mvalue))
 
     def switch_mode(self, mode, collapsed):
         if mode == 'input' and collapsed == False:

@@ -20,7 +20,7 @@ if onRPi:
     GPIO.setmode(GPIO.BCM)
 
 
-# Class for monitoring markers recieved on logic (LPT/TTL) ports.
+# Class for monitoring markers received on logic (LPT/TTL) ports.
 class MarkerMonitor(threading.Thread):
 
     def __init__(self, test_markers, \
@@ -49,14 +49,14 @@ class MarkerMonitor(threading.Thread):
 
         self.isAlive = True
 
-        # List and dictionary to track markers and their occurences:
+        # List and dictionary to track markers and their occurrences:
         self.markerList = list()
         self.markerOccurDict = {}
 
         # Callbacks to be executed when the value changes:
         self.valueChangeCallbacks = {}
 
-        # Tarcking parameters:
+        # Tracking parameters:
         self.lastValue = 0
         self.curValue = 0
 
@@ -140,14 +140,14 @@ class MarkerMonitor(threading.Thread):
     def addNewMarker(self, value, startTime, endTime):
         ''' Adds a new marker to the marker list. '''
 
-        # Calculate the occurence:
+        # Calculate the occurrence:
         if self.markerOccurDict.get(value) == None:
-            occurence = 1
+            occurrence = 1
         else:
-            occurence = self.markerOccurDict.get(value) + 1
+            occurrence = self.markerOccurDict.get(value) + 1
 
-        # Save the current occurence so that it can be reasily tracked:
-        self.markerOccurDict[value] = occurence
+        # Save the current occurrence so that it can be easily tracked:
+        self.markerOccurDict[value] = occurrence
 
         # Make marker, and append it to the list:
         self.markerList.append({ \
@@ -155,7 +155,7 @@ class MarkerMonitor(threading.Thread):
             'startTime': startTime, \
             'endTime': endTime, \
             'duration': endTime - startTime, \
-            'occurence': occurence})
+            'occurrence': occurrence})
 
     def getMarkerOccurence(self, value):
         return self.markerOccurDict.get(value)
