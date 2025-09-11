@@ -1,6 +1,6 @@
-pigpio~=1.78
-gpiozero~=2.0.1
-lgpio~=0.2.2.0
+# pigpio~=1.78
+# gpiozero~=2.0.1
+# lgpio~=0.2.2.0
 RPi.GPIO~=0.7.1
 
 Kivy~=2.3.1
