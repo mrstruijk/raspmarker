@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# main.py
+# markerbox.py
 
 """
 Bootstrap script for the MarkerBox application.
@@ -23,22 +23,19 @@ marker_monitor = MarkerMonitor(args)
 marker_out = MarkerOut()
 
 
-class MarkerBoxApp(KivyApp):
-    """
-    Sub‑class the original app, so we can override ``build`` and
-    supply the pre‑created objects.
-    """
-    def build(self):
-        return MarkerWidget(marker_monitor=marker_monitor, marker_out=marker_out)
+def run():
+    class MarkerBoxApp(KivyApp):
+        """
+            Sub‑class the original app, so we can override ``build`` and
+            supply the pre‑created objects.
+            """
+        def build(self):
+            return MarkerWidget(marker_monitor=marker_monitor, marker_out=marker_out)
 
-    def on_stop(self):
-        marker_monitor.stopTracking()
-        marker_monitor.kill()
+        def on_stop(self):
+            marker_monitor.stopTracking()
+            marker_monitor.kill()
 
-# ----------------------------------------------------------------------
-# Run the program.
-# ----------------------------------------------------------------------
-if __name__ == "__main__":
     try:
         marker_monitor.start_thread()
         marker_monitor.startTracking()
@@ -50,3 +47,9 @@ if __name__ == "__main__":
         marker_monitor.kill()
         marker_out.cleanup()
         sys.exit(0)
+
+# ----------------------------------------------------------------------
+# Run the program.
+# ----------------------------------------------------------------------
+if __name__ == "__main__":
+    run()
