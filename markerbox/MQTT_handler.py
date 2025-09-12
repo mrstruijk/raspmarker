@@ -27,7 +27,7 @@ class MQTTHandler:
     def _on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print(f"Connected to MQTT broker {self.broker}:{self.port}, with username {self.username} and password {self.password}, and default_topic {self.default_topic}")
-            # client.subscribe(self.default_topic)
+            client.subscribe(self.default_topic)
         else:
             print(f"Failed to connect, return code {rc}")
 

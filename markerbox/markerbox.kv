@@ -292,7 +292,7 @@
                         size: root.size
                 padding: 6
                 spacing: 6
-                   
+
                 Slider:
                     id: slider
                     min: 0
@@ -350,9 +350,11 @@
                     Label:
                         text: '2'
                     Label:
-                        text: '1'                            
+                        text: '1'
 
                 Button:
-                    text: str(sum([int(b)*(2**i) for i, b in enumerate([bulb_0.active, bulb_1.active, bulb_2.active, bulb_3.active, bulb_4.active, bulb_5.active, bulb_6.active, bulb_7.active])]))
-                    on_press: root.send_marker_to_lpt(self.text)
+                    text: str(root.output_value)
+                    on_press:
+                        root.compute_output_value()
+                        root.send_marker_to_lpt(root.output_value)
 

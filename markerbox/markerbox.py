@@ -10,16 +10,17 @@ and hands them to the Kivy GUI (MarkerWidget) via the MarkerBoxApp.
 """
 
 import sys
+
 from kivy.app import App as KivyApp
+from kivyGUI import MarkerWidget
 
 from MarkerMonitor import MarkerMonitor
 from MarkerOut import MarkerOut
-from kivyGUI import MarkerWidget
+
 from MQTT_handler import MQTTHandler
 
-
 # get input args from when running the app (e.g. python markerbox 1 (=use random markers)), but default to 0 (=use real markers) if none are given.
-args = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+args = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
 marker_monitor = MarkerMonitor(args)
 marker_out = MarkerOut()

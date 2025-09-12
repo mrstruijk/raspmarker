@@ -48,16 +48,18 @@ class MarkerWidget(BoxLayout):
     bulb_value = NumericProperty(0)
     last_marker = StringProperty("Last: XX (dur: N.NNN s, occur: NNN)")
     marker_graph = ObjectProperty(None)
-    # current_time = round(MM.getCurTime()/1000,0)
     xmax = NumericProperty(0)
-    # outputmarker = NumericProperty(42)
 
     color = ListProperty([1, 0, 0, 1])
+    output_value = NumericProperty(0)
+
+
 
     def __init__(self, marker_monitor, marker_out, **kwargs):  # initialize marker widget
         super(MarkerWidget, self).__init__(**kwargs)
         self.marker_monitor = marker_monitor
         self.marker_out = marker_out
+
         self.tab_num = 1
         self.tracking = False
         self.cur_time = 0
@@ -78,7 +80,7 @@ class MarkerWidget(BoxLayout):
                 self.marker_graph.add_plot(self.plot)
         except Exception:
             pass
-        self.marker_monitor.resetMarkers()
+        # self.marker_monitor.resetMarkers()
         # schedule update loop (keep a single schedule here)
         self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)
         # schedule periodic summary table update
@@ -172,6 +174,19 @@ class MarkerWidget(BoxLayout):
             tail = []
         self.rv.data = tableHeader + new_markers + tail
 
+    def compute_output_value(self):
+        bulbs = [
+            self.ids.bulb_0.active,
+            self.ids.bulb_1.active,
+            self.ids.bulb_2.active,
+            self.ids.bulb_3.active,
+            self.ids.bulb_4.active,
+            self.ids.bulb_5.active,
+            self.ids.bulb_6.active,
+            self.ids.bulb_7.active,
+        ]
+        self.output_value = sum(int(b) * (2 ** i) for i, b in enumerate(bulbs))
+
     def create_summary_table(self):
         table = []
 
@@ -182,7 +197,7 @@ class MarkerWidget(BoxLayout):
                                   }]
         self.rv2.data = summaryHeader + table
 
-    def send_marker_to_lpt(self, value: str):
+    def send_marker_to_lpt(self, value):
         value = int(value)
         self.marker_out.send_marker_to_lpt(value)
 

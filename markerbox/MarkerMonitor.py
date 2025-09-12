@@ -70,6 +70,8 @@ class MarkerMonitor(threading.Thread):
         # Variable for faking a marker signal:
         self.valueSpoofer = 0
 
+        self.resetMarkers()
+
     def subscribe_to_markers(self, callback):
         """Register a Python function to be called when a marker is received."""
         if callable(callback):
@@ -98,7 +100,7 @@ class MarkerMonitor(threading.Thread):
 
             if self.trackMarkers:
                 if self.curValue != self.lastValue: # If the value has changed...
-                    print(f"current value ({self.curValue} != last value ({self.lastValue}))")
+                    # print(f"current value ({self.curValue} != last value ({self.lastValue}))")
 
                     self.on_marker_received(self.curValue) # Let every interested party know that a marker has been received. This includes a 0 marker.
 
@@ -172,7 +174,7 @@ class MarkerMonitor(threading.Thread):
             'duration': endTime - startTime,
             'occurrence': occurrence})
 
-        print(f"MarkerReceived: {self.markerList[-1]}")
+        # print(f"MarkerReceived: {self.markerList[-1]}")
 
     def get_marker_occurrence(self, value):
         return self.markerOccurDict.get(value)

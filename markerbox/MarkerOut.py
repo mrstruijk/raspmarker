@@ -22,8 +22,7 @@ class MarkerOut:
     def __init__(self):
         pass
 
-    @staticmethod
-    def send_marker_to_lpt(value: int):
+    def send_marker_to_lpt(self, value: int):
         """
              Send an 8‑bit integer (`0–255`) to the LPT attached hardware (Biosemi / Biopac).
          """
