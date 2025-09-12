@@ -22,7 +22,8 @@ class MarkerOut:
     def __init__(self):
         pass
 
-    def send_marker_to_lpt(self, value: int):
+    @staticmethod
+    def send_marker_to_lpt(value: int):
         """
              Send an 8‑bit integer (`0–255`) to the LPT attached hardware (Biosemi / Biopac).
          """
@@ -38,7 +39,8 @@ class MarkerOut:
         else:
             print(f"Mock send_marker_to_lpt with value {value}.")
 
-    def cleanup(self):
+    @staticmethod
+    def cleanup():
         if onRPi:
             GPIO.cleanup()
 

@@ -11,17 +11,31 @@ and hands them to the Kivy GUI (MarkerWidget) via the MarkerBoxApp.
 
 import sys
 from kivy.app import App as KivyApp
-from MarkerMonitor import MarkerMonitor      # ← your monitor class
-from MarkerOut import MarkerOut              # ← your output class
-from kivyGUI import MarkerWidget             # ← UI & App
+
+from MarkerMonitor import MarkerMonitor
+from MarkerOut import MarkerOut
+from kivyGUI import MarkerWidget
+from MQTT_handler import MQTTHandler
 
 
-# get input args from when running the app (e.g. python markerbox 1), but default to 0 if none are given
+# get input args from when running the app (e.g. python markerbox 1 (=use random markers)), but default to 0 (=use real markers) if none are given.
 args = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
 marker_monitor = MarkerMonitor(args)
 marker_out = MarkerOut()
 
+mqtt_handler = MQTTHandler()
+
+def mqtt_init():
+    mqtt_handler = MQTTHandler(
+        broker="192.168.1.40",
+        port=1883,
+        username="SOLO",
+        password="SOLO1B11",
+        topic="raspmarker")
+    mqtt_handler.connect()
+    mqtt_handler.start()
+    mqtt_handler.subscribe(marker_out.send_marker_to_lpt)
 
 def run():
     class MarkerBoxApp(KivyApp):
@@ -39,6 +53,9 @@ def run():
     try:
         marker_monitor.start_thread()
         marker_monitor.startTracking()
+
+        mqtt_init()
+
         MarkerBoxApp().run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt received, shutting down...")
@@ -48,8 +65,6 @@ def run():
         marker_out.cleanup()
         sys.exit(0)
 
-# ----------------------------------------------------------------------
-# Run the program.
-# ----------------------------------------------------------------------
+
 if __name__ == "__main__":
     run()

@@ -1,21 +1,20 @@
 MarkerBox
 
-Python 3.7.3
-
-Requirements libraries:
-Kivy==1.11.1
-kivy-garden.graph===0.4.dev0
-
-RPi.GPIO ... (when using Marker Input and Raspberry Pi)
-
 Run:
 
 When using random markers:
 
-python kivyGUI.py 0
+python markerbox.py 1
 
 When using markers from input:
 
-python kivyGUI.py 1
+python markerbox.py
 
- 
+
+---
+
+Uses GPIO pins:
+- IN = 21, 20, 16, 12, 7, 8, 25, 24
+- OUT = 26, 19, 13
+![Pi pins](https://www.raspberrypi.com/documentation/computers/images/GPIO-Pinout-Diagram-2.png?hash=df7d7847c57a1ca6d5b2617695de6d46):
+
