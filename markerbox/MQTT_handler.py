@@ -66,3 +66,10 @@ class MQTTHandler:
             print(f"Trying to connect to {self.broker}:{self.port} ...")
         except Exception as e:
             print(f"MQTT connection failed: {e}")
+
+    def disconnect(self):
+        try:
+            self.client.disconnect()
+            print(f"Disconnected from {self.broker}:{self.port} ...")
+        except Exception as e:
+            print(f"MQTT disconnection failed: {e}")

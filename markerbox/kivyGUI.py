@@ -137,6 +137,7 @@ class MarkerWidget(BoxLayout):
     def on_touch_down_graph(self, touch):
         self.initial_touch = touch.x
 
+
     def on_touch_up_graph(self, touch):
         self.xmax = self.xmax + ((self.initial_touch - touch.x) / 100)
 
@@ -155,6 +156,7 @@ class MarkerWidget(BoxLayout):
 
     def led_state(self, value, bit):
         bit_string = '{:08b}'.format(int(value))  # format value as 8-bit string
+        print(bit_string)
         return int(bit_string[-(bit + 1)]) == 1
 
     def update_table(self):
@@ -204,6 +206,9 @@ class MarkerWidget(BoxLayout):
     def switch_mode(self, mode, collapsed):
         if mode == 'input' and collapsed == False:
             self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)  #
+            print("in")
         else:
+            self.compute_output_value()
+            print("switch_mode: out")
             self.event.cancel()
         return True

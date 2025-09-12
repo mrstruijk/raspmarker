@@ -26,7 +26,7 @@ class MarkerMonitor(threading.Thread):
     def start_thread(self):
         self.start()
 
-    def __init__(self, use_random_markers,
+    def __init__(self, use_random_markers : bool,
                  input_pins=[21, 20, 16, 12, 7, 8, 25, 24],
                  pollInterval_ms=1
                  ):
@@ -180,9 +180,9 @@ class MarkerMonitor(threading.Thread):
         return self.markerOccurDict.get(value)
 
     def readCurValue(self):
-        if self.use_random_markers == 0 and onRPi:
+        if self.use_random_markers == False and onRPi:
                 return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.input_pins)])
-        elif self.use_random_markers == 1: # Use random markers
+        elif self.use_random_markers: # Use random markers
             N = 100  # Make this dependent on the polling interval.
 
             curMark = self.valueSpoofer
@@ -197,9 +197,9 @@ class MarkerMonitor(threading.Thread):
             self.valueSpoofer = curMark
             # print("DEBUG: Current value:", curMark)
             return curMark
-        elif self.use_random_markers == 0:
+        elif not self.use_random_markers:
             return 0
-
+        return None
 
         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         # MAKE GENERATOR TO RETURN PARSED MARKERS!

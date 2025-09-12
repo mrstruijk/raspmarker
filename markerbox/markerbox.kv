@@ -280,7 +280,7 @@
         AccordionItem:
             title: 'Output mode'
             collapse: True
-            #on_collapse: root.switch_mode('input', self.collapse)
+            # on_collapse: root.switch_mode('input', self.collapse)
 
             BoxLayout:
                 id: output
@@ -303,6 +303,7 @@
                     value: 42
                     size_hint_y: None
                     width: 0.9
+                    on_value: root.compute_output_value()
 
                 GridLayout:
                     rows: 2
