@@ -10,6 +10,13 @@ When using markers from input:
 
 python markerbox.py
 
+---
+# TODO:
+1. Make GUI have a third tab: all markers. This is also where MQTT markers can easily be observed.
+2. Make MQTT optional
+3. Make args be `bool` `bool` `bool` for: use random markers, use GUI, use MQTT.
+4. Display better (in both console and GUI) where each marker came from: from LPT? Sent to MQTT? Command from MQTT?
+
 
 ---
 
