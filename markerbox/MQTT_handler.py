@@ -8,12 +8,12 @@ import threading
 
 class MQTTHandler:
     def __init__(self, broker="localhost", port=1883,
-                 username=None, password=None, topic="SOSXR"):
+                 username=None, password=None, default_topic=None):
         self.broker = broker
         self.port = port
         self.username = username
         self.password = password
-        self.topic = topic
+        self.default_topic = default_topic
 
         self._callbacks = []  # list of subscribed callables
 
@@ -26,8 +26,8 @@ class MQTTHandler:
 
     def _on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            print(f"Connected to MQTT broker {self.broker}:{self.port}")
-            client.subscribe(self.topic)
+            print(f"Connected to MQTT broker {self.broker}:{self.port}, with username {self.username} and password {self.password}, and default_topic {self.default_topic}")
+            # client.subscribe(self.default_topic)
         else:
             print(f"Failed to connect, return code {rc}")
 
@@ -43,8 +43,15 @@ class MQTTHandler:
         thread = threading.Thread(target=self.client.loop_forever, daemon=True)
         thread.start()
 
-    def publish(self, topic, message):
-        self.client.publish(topic, message)
+    def publish_to_default_topic(self, payload):
+        self.publish(self.default_topic, payload)
+
+    def publish(self, topic, payload):
+        if topic is None or len(topic) == 0:
+            print(f"Invalid topic: {topic}")
+            #return
+        print(f"Publishing to topic: {self.default_topic}, payload: {payload}")
+        self.client.publish(topic, payload)
 
     def subscribe(self, callback):
         """Register a Python function to be called with the int payload."""

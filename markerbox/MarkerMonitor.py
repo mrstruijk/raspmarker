@@ -21,7 +21,7 @@ import GS_timing as timing
 
 
 class MarkerMonitor(threading.Thread):
-    """ Utility for monitoring markers received on logic (LPT/TTL) ports. These usually consists of markers from devices like Biopac/Biosemi that are being sent to the Pi """
+    """ Utility for monitoring markers received on logic (LPT/TTL) ports. These usually consists of markers from devices like Biopac/Biosemi that are being sent to the Pi. Marker 0 can be used to end a previous marker, or by sending a new marker. There cannot be two simultaneous markers (unless you use sending the same marker twice as a kind of start-stop marker). """
 
     def start_thread(self):
         self.start()
@@ -58,7 +58,7 @@ class MarkerMonitor(threading.Thread):
         self.markerOccurDict = {}
 
         # Callbacks to be executed when the value changes:
-        self.valueChangeCallbacks = []
+        self.marker_callbacks = []
 
         # Tracking parameters:
         self.lastValue = 0
@@ -70,16 +70,17 @@ class MarkerMonitor(threading.Thread):
         # Variable for faking a marker signal:
         self.valueSpoofer = 0
 
-    def subscribe(self, callback):
-        """Register a Python function to be called with the int payload."""
+    def subscribe_to_markers(self, callback):
+        """Register a Python function to be called when a marker is received."""
         if callable(callback):
-            self.valueChangeCallbacks.append(callback)
+            self.marker_callbacks.append(callback)
         else:
             raise ValueError("subscribe() requires a callable")
 
-    def onValueChanged(self, payload):
-        for callback in self.valueChangeCallbacks:
-            callback(payload)
+    def on_marker_received(self, marker: int):
+        """Notify all Python functions that a marker has been received"""
+        for callback in self.marker_callbacks:
+            callback(marker)
 
     def run(self):
 
@@ -99,15 +100,13 @@ class MarkerMonitor(threading.Thread):
                 if self.curValue != self.lastValue: # If the value has changed...
                     print(f"current value ({self.curValue} != last value ({self.lastValue}))")
 
+                    self.on_marker_received(self.curValue) # Let every interested party know that a marker has been received. This includes a 0 marker.
+
                     self.lastValue = self.curValue # Store current value as the last value
-                    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    # RUN NEW VALUE CALLBACKS
-                    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
                     if markerBeingReceived != {}:
                         # If a marker was being received and the value changed,
                         # end the marker, and push it into the marker list:
-
                         markerBeingReceived["endTime"] = self.getCurTime()
                         self.addNewMarker(**markerBeingReceived)
 
@@ -115,17 +114,18 @@ class MarkerMonitor(threading.Thread):
                         markerBeingReceived = {}
 
                     if self.curValue != 0:
-                        # If the new value is not zero, create a new marker:
-
-                        # Make new marker:
+                        # If the new marker sent is not zero, we want to create a new marker:
                         markerBeingReceived = {'value': self.curValue,
                                                'startTime': self.getCurTime()}
 
 
-                        print(f"MarkerBeingReceived: {markerBeingReceived}")
+
+                        # print(f"MarkerBeingReceived: {markerBeingReceived}")
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                         # RUN NEW MARKER CALLBACKS
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 
             # Sleep until the next poll:
             time.sleep(self.pollInterval_ms / 1000.0)
@@ -153,7 +153,7 @@ class MarkerMonitor(threading.Thread):
         pass
 
     def addNewMarker(self, value, startTime, endTime):
-        """ Adds a new marker to the marker list. """
+        """ Adds a new marker to the marker list. This happens when the marker has 'finished': so it has started and stopped """
 
         # Calculate the occurrence:
         if self.markerOccurDict.get(value) is None:
@@ -172,6 +172,8 @@ class MarkerMonitor(threading.Thread):
             'duration': endTime - startTime,
             'occurrence': occurrence})
 
+        print(f"MarkerReceived: {self.markerList[-1]}")
+
     def get_marker_occurrence(self, value):
         return self.markerOccurDict.get(value)
 
@@ -181,13 +183,13 @@ class MarkerMonitor(threading.Thread):
         elif self.use_random_markers == 1: # Use random markers
             N = 100  # Make this dependent on the polling interval.
 
-            # Have a 1 in N chance to change the current marker:
             curMark = self.valueSpoofer
+            # Have a 1 in N chance to change the current marker:
             if random.randint(0, N) == 1:
                 # Have a 1 in N/4 chance to go to a non-zero marker:
                 if random.randint(0, round(N / 4)) == 1:
                     curMark = random.randint(0, 255)
-                else:
+                else: # in most cases marker '0' will be sent out.
                     curMark = 0
 
             self.valueSpoofer = curMark
