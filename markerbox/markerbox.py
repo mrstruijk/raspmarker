@@ -19,7 +19,7 @@ from MQTT_handler import MQTTHandler
 
 
 # get input args from when running the app (e.g. python markerbox 1 (=use random markers)), but default to 0 (=use real markers) if none are given.
-args = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+args = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
 marker_monitor = MarkerMonitor(args)
 marker_out = MarkerOut()

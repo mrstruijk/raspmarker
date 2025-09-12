@@ -58,7 +58,7 @@ class MarkerMonitor(threading.Thread):
         self.markerOccurDict = {}
 
         # Callbacks to be executed when the value changes:
-        self.valueChangeCallbacks = {}
+        self.valueChangeCallbacks = []
 
         # Tracking parameters:
         self.lastValue = 0
@@ -70,53 +70,59 @@ class MarkerMonitor(threading.Thread):
         # Variable for faking a marker signal:
         self.valueSpoofer = 0
 
-        # Start!
-        # self.start_thread()
-        # self.startTracking()
+    def subscribe(self, callback):
+        """Register a Python function to be called with the int payload."""
+        if callable(callback):
+            self.valueChangeCallbacks.append(callback)
+        else:
+            raise ValueError("subscribe() requires a callable")
 
+    def onValueChanged(self, payload):
+        for callback in self.valueChangeCallbacks:
+            callback(payload)
 
     def run(self):
 
         # Initialize vars:
-        markerBeingRecieved = {}
+        markerBeingReceived = {}
         self.lastValue = self.readCurValue()
         self.startTime = timing.millis()
 
         # TODO: make lastValue and curValue local, not dyn props.
 
+        print("running")
         while self.isAlive:
-
             # Read out latest marker value:
             self.curValue = self.readCurValue()
 
             if self.trackMarkers:
-                # If tracking is enabled:
+                if self.curValue != self.lastValue: # If the value has changed...
+                    print(f"current value ({self.curValue} != last value ({self.lastValue}))")
 
-                if self.curValue != self.lastValue:
-                    # If the value has changed...
-                    self.lastValue = self.curValue
-
+                    self.lastValue = self.curValue # Store current value as the last value
                     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     # RUN NEW VALUE CALLBACKS
                     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-                    if markerBeingRecieved != {}:
-                        # If a marker was being recieved and the value changed,
+                    if markerBeingReceived != {}:
+                        # If a marker was being received and the value changed,
                         # end the marker, and push it into the marker list:
 
-                        markerBeingRecieved["endTime"] = self.getCurTime()
-                        self.addNewMarker(**markerBeingRecieved)
+                        markerBeingReceived["endTime"] = self.getCurTime()
+                        self.addNewMarker(**markerBeingReceived)
 
                         # Reset current marker:
-                        markerBeingRecieved = {}
+                        markerBeingReceived = {}
 
                     if self.curValue != 0:
                         # If the new value is not zero, create a new marker:
 
                         # Make new marker:
-                        markerBeingRecieved = {'value': self.curValue,
+                        markerBeingReceived = {'value': self.curValue,
                                                'startTime': self.getCurTime()}
 
+
+                        print(f"MarkerBeingReceived: {markerBeingReceived}")
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                         # RUN NEW MARKER CALLBACKS
                         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -172,8 +178,8 @@ class MarkerMonitor(threading.Thread):
     def readCurValue(self):
         if self.use_random_markers == 0 and onRPi:
                 return sum([int(GPIO.input(p)) * (2 ** i) for i, p in enumerate(self.input_pins)])
-        else: # Use random markers
-            N = 10  # Make this dependent on the polling interval.
+        elif self.use_random_markers == 1: # Use random markers
+            N = 100  # Make this dependent on the polling interval.
 
             # Have a 1 in N chance to change the current marker:
             curMark = self.valueSpoofer
@@ -187,6 +193,9 @@ class MarkerMonitor(threading.Thread):
             self.valueSpoofer = curMark
             # print("DEBUG: Current value:", curMark)
             return curMark
+        elif self.use_random_markers == 0:
+            return 0
+
 
         # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         # MAKE GENERATOR TO RETURN PARSED MARKERS!

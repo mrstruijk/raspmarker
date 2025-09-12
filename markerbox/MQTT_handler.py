@@ -34,8 +34,8 @@ class MQTTHandler:
     def _on_message(self, client, userdata, msg):
         try:
             payload = int(msg.payload.decode().strip())
-            for cb in self._callbacks:
-                cb(payload)
+            for callback in self._callbacks:
+                callback(payload)
         except Exception as e:
             print(f"Error handling message: {e}")
 
