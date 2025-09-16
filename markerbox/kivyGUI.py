@@ -206,9 +206,7 @@ class MarkerWidget(BoxLayout):
     def switch_mode(self, mode, collapsed):
         if mode == 'input' and collapsed == False:
             self.event = Clock.schedule_interval(self.clock_callback, INTERVAL)  #
-            print("in")
         else:
             self.compute_output_value()
-            print("switch_mode: out")
             self.event.cancel()
         return True
