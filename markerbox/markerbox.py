@@ -6,8 +6,8 @@ import sys
 import argparse
 import threading
 
-from MarkerMonitor import MarkerMonitor
-from MarkerOut import MarkerOut
+from markermonitor import MarkerMonitor
+from markerout import MarkerOut
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="MarkerBox Application")
@@ -29,7 +29,7 @@ args = parser.parse_args()
 # Conditional imports (only if GUI enabled)
 if args.gui:
     from kivy.app import App as KivyApp
-    from kivyGUI import MarkerWidget
+    from kivygui import MarkerWidget
 
 # Create shared objects
 marker_monitor = MarkerMonitor(args.random)
@@ -43,17 +43,20 @@ def start_services():
     marker_monitor.startTracking()
 
     if args.mqtt:
-        from MQTT_handler import MQTTHandler
+        from mqtthandler import MQTTHandler
         global mqtt_handler
         mqtt_handler = MQTTHandler(
-            broker="192.168.1.40",
+            broker="154.118.221.36",
             port=1883,
             username="SOLO",
             password="SOLO1B11",
             default_topic="raspmarker")
 
-        mqtt_handler.subscribe(marker_out.send_marker_to_lpt)
-        marker_monitor.subscribe_to_markers(mqtt_handler.publish_to_default_topic)
+        #mqtt_handler.subscribe(marker_out.send_marker_to_lpt)
+        #marker_monitor.subscribe_to_markers(mqtt_handler.publish_to_default_topic)
+
+        marker_out.callbacks(callback=mqtt_handler.publish_to_default_topic)
+        marker_monitor.callbacks(callback=mqtt_handler.publish_to_default_topic)
 
         mqtt_handler.connect()
         mqtt_handler.start()

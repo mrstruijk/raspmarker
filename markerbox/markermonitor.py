@@ -10,7 +10,6 @@ import random
 import threading
 import time
 
-
 onRPi = (platform.system() == 'Linux')
 
 if onRPi:
@@ -19,6 +18,7 @@ if onRPi:
 
 import GS_timing as timing
 
+mqtt_handler = None
 
 class MarkerMonitor(threading.Thread):
     """ Utility for monitoring markers received on logic (LPT/TTL) ports. These usually consists of markers from devices like Biopac/Biosemi that are being sent to the Pi. Marker 0 can be used to end a previous marker, or by sending a new marker. There cannot be two simultaneous markers (unless you use sending the same marker twice as a kind of start-stop marker). """
@@ -72,17 +72,9 @@ class MarkerMonitor(threading.Thread):
 
         self.resetMarkers()
 
-    def subscribe_to_markers(self, callback):
-        """Register a Python function to be called when a marker is received."""
-        if callable(callback):
-            self.marker_callbacks.append(callback)
-        else:
-            raise ValueError("subscribe() requires a callable")
-
-    def on_marker_received(self, marker: int):
-        """Notify all Python functions that a marker has been received"""
-        for callback in self.marker_callbacks:
-            callback(marker)
+    def callbacks(self, callback=None, value: int = 0):
+        if callback is not None:
+            callback(value)
 
     def run(self):
 
@@ -102,7 +94,7 @@ class MarkerMonitor(threading.Thread):
                 if self.curValue != self.lastValue: # If the value has changed...
                     # print(f"current value ({self.curValue} != last value ({self.lastValue}))")
 
-                    self.on_marker_received(self.curValue) # Let every interested party know that a marker has been received. This includes a 0 marker.
+                    self.callbacks(value=self.curValue) # Let every interested party know that a marker has been received. This includes a 0 marker.
 
                     self.lastValue = self.curValue # Store current value as the last value
 

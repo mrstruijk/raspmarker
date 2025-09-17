@@ -21,8 +21,8 @@ from kivy.properties import StringProperty, ListProperty, ObjectProperty, Numeri
 from kivy.uix.boxlayout import BoxLayout
 from kivy_garden.graph import MeshLinePlot
 
-import MarkerMonitor as m
-import MarkerOut
+import markermonitor as m
+import markerout
 
 INTERVAL = 0.1  # clock interval in seconds
 
