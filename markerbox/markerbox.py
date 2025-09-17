@@ -36,7 +36,6 @@ marker_monitor = MarkerMonitor(args.random)
 marker_out = MarkerOut()
 stop_event = threading.Event()
 
-# mqtt_handler = None
 
 def start_services():
     marker_monitor.start_thread()
@@ -68,9 +67,8 @@ def stop_services():
     marker_monitor.stopTracking()
     marker_monitor.kill()
     marker_out.cleanup()
-    if mqtt_handler:
+    if mqtt_handler is not None:
         mqtt_handler.disconnect()
-        print("This reference is not safe: it can lead to a None type if it's not initialized.")
 
 
 def run():

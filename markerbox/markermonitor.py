@@ -1,9 +1,6 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Nov  4 19:51:39 2018
-
-@author: Elio
-"""
+# markermonitor.py
 
 import platform
 import random
@@ -76,7 +73,7 @@ class MarkerMonitor(threading.Thread):
         self.marker_callbacks.append(callback)
 
     def callback(self, value : int = 0):
-        if self.marker_callbacks:
+        if self.marker_callbacks is not None and len(self.marker_callbacks) > 0:
             for callback in self.marker_callbacks:
                 callback(value)
 

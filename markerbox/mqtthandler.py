@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# mqtt_handler.py
+# mqtthandler.py
 
 import paho.mqtt.client as mqtt
 import threading

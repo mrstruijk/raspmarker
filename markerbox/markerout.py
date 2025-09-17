@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# markerout.py
+
 import platform
 
 
@@ -23,15 +27,15 @@ if onRPi:
 class MarkerOut:
     """Utility for sending 8‑bit markers to a 74HC595 shift register. These are usually connected to a Biosemi/Biopac device, where these markers can be read / stored."""
     def __init__(self):
-        self.callbackslist = []
+        self.marker_callbacks = []
 
     def subscribe(self, callback):
         # subscribe to list of callbacks
-        self.callbackslist.append(callback)
+        self.marker_callbacks.append(callback)
 
     def callback(self, value : int = 0):
-        if self.callbackslist:
-            for callback in self.callbackslist:
+        if self.marker_callbacks is not None and len(self.marker_callbacks) > 0:
+            for callback in self.marker_callbacks:
                 callback(value)
 
     def send_marker_to_lpt(self, value: int):
