@@ -52,7 +52,6 @@ def start_services():
             password="SOLO1B11",
             default_topic="raspmarker")
 
-        marker_out.subscribe(mqtt_handler.publish_to_default_topic)
         marker_out.subscribe(
             lambda value: mqtt_handler.publish(mqtt_handler.default_topic + "/from-GUI", value)
         )
