@@ -18,7 +18,6 @@ if onRPi:
 
 import GS_timing as timing
 
-mqtt_handler = None
 
 class MarkerMonitor(threading.Thread):
     """ Utility for monitoring markers received on logic (LPT/TTL) ports. These usually consists of markers from devices like Biopac/Biosemi that are being sent to the Pi. Marker 0 can be used to end a previous marker, or by sending a new marker. There cannot be two simultaneous markers (unless you use sending the same marker twice as a kind of start-stop marker). """
