@@ -40,17 +40,19 @@ class MQTTHandler:
             print(f"Error handling message: {e}")
 
     def start(self):
-        thread = threading.Thread(target=self.client.loop_forever, daemon=True)
-        thread.start()
+        # thread = threading.Thread(target=self.client.loop_forever, daemon=True)
+        # thread.start()
+        self.client.loop_start()
 
     def publish_to_default_topic(self, payload):
+        print(f"Publishing to default topic: {self.default_topic}, payload: {payload}")
         self.publish(self.default_topic, payload)
 
     def publish(self, topic, payload):
         if topic is None or len(topic) == 0:
             print(f"Invalid topic: {topic}")
             #return
-        print(f"Publishing to topic: {self.default_topic}, payload: {payload}")
+        print(f"Publishing to topic: {topic}, payload: {payload}")
         self.client.publish(topic, payload)
 
     def subscribe(self, callback):

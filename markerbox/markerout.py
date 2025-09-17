@@ -17,14 +17,22 @@ if onRPi:
     GPIO.setup(PIN_LATCH, GPIO.OUT)
     GPIO.setup(PIN_CLOCK, GPIO.OUT)
 
+
+
+
 class MarkerOut:
     """Utility for sending 8‑bit markers to a 74HC595 shift register. These are usually connected to a Biosemi/Biopac device, where these markers can be read / stored."""
     def __init__(self):
-        pass
+        self.callbackslist = []
 
-    def callbacks(self, callback=None, value : int = 0):
-        if callback is not None:
-            callback(value)
+    def subscribe(self, callback):
+        # subscribe to list of callbacks
+        self.callbackslist.append(callback)
+
+    def callback(self, value : int = 0):
+        if self.callbackslist:
+            for callback in self.callbackslist:
+                callback(value)
 
     def send_marker_to_lpt(self, value: int):
         """
@@ -41,7 +49,7 @@ class MarkerOut:
             print(f"Sending value {value} to the LPT attached hardware.")
         else:
             print(f"Mock send_marker_to_lpt with value {value}.")
-        self.callbacks(value=value)
+        self.callback(value=value)
 
     @staticmethod
     def cleanup():

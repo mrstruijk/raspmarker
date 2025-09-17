@@ -52,11 +52,8 @@ def start_services():
             password="SOLO1B11",
             default_topic="raspmarker")
 
-        #mqtt_handler.subscribe(marker_out.send_marker_to_lpt)
-        #marker_monitor.subscribe_to_markers(mqtt_handler.publish_to_default_topic)
-
-        marker_out.callbacks(callback=mqtt_handler.publish_to_default_topic)
-        marker_monitor.callbacks(callback=mqtt_handler.publish_to_default_topic)
+        marker_out.subscribe(mqtt_handler.publish_to_default_topic)
+        # marker_monitor.callbacks(callback=mqtt_handler.publish_to_default_topic)
 
         mqtt_handler.connect()
         mqtt_handler.start()

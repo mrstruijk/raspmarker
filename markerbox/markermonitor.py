@@ -72,9 +72,6 @@ class MarkerMonitor(threading.Thread):
 
         self.resetMarkers()
 
-    def callbacks(self, callback=None, value: int = 0):
-        if callback is not None:
-            callback(value)
 
     def run(self):
 
@@ -94,7 +91,7 @@ class MarkerMonitor(threading.Thread):
                 if self.curValue != self.lastValue: # If the value has changed...
                     # print(f"current value ({self.curValue} != last value ({self.lastValue}))")
 
-                    self.callbacks(value=self.curValue) # Let every interested party know that a marker has been received. This includes a 0 marker.
+                    #self.callbacks(value=self.curValue) # Let every interested party know that a marker has been received. This includes a 0 marker.
 
                     self.lastValue = self.curValue # Store current value as the last value
 
