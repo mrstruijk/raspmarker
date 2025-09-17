@@ -36,7 +36,7 @@ marker_monitor = MarkerMonitor(args.random)
 marker_out = MarkerOut()
 stop_event = threading.Event()
 
-mqtt_handler = None
+# mqtt_handler = None
 
 def start_services():
     marker_monitor.start_thread()
@@ -46,14 +46,20 @@ def start_services():
         from mqtthandler import MQTTHandler
         global mqtt_handler
         mqtt_handler = MQTTHandler(
-            broker="154.118.221.36",
+            broker="145.118.221.36",
             port=1883,
             username="SOLO",
             password="SOLO1B11",
             default_topic="raspmarker")
 
         marker_out.subscribe(mqtt_handler.publish_to_default_topic)
-        # marker_monitor.callbacks(callback=mqtt_handler.publish_to_default_topic)
+        marker_out.subscribe(
+            lambda value: mqtt_handler.publish(mqtt_handler.default_topic + "/from-GUI", value)
+        )
+
+        marker_monitor.subscribe(
+            lambda value: mqtt_handler.publish(mqtt_handler.default_topic + "/from-LPT", value)
+        )
 
         mqtt_handler.connect()
         mqtt_handler.start()
