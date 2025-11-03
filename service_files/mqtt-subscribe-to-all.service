@@ -13,6 +13,7 @@ After=network.target
 [Service]
 ExecStart=/usr/local/bin/mqtt-subscribe-to-all.sh
 Restart=always
+RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
