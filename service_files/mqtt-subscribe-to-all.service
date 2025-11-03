@@ -11,7 +11,7 @@ Description=Mosquitto Subscriber to all topics
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/mqtt-subscribe-to-all.sh
+ExecStart=/usr/local/bin/mqtt-subscribe-to-all
 Restart=always
 RestartSec=5
 StandardOutput=journal

@@ -1,0 +1,28 @@
+#!/bin/bash
+# /usr/local/bin/mqtt-publish
+# Usage: mqtt-publish "message" ["topic"]
+# Topic is optional, defaults to "SOSXR/debug"
+# Make executable: chmod +x /usr/local/bin/mqtt-publish
+# Install "ts" via `sudo apt install moreutils`
+# View stored logs via `cat ~/.local/share/mqtt-logs/mqtt-publish.log` (or whatever is set at LOGFILE)
+
+LOGDIR="$HOME/.local/share/mqtt-logs"
+LOGFILE="$LOGDIR/mqtt-publish.log"
+LOGHEADER="[%Y-%m-%d %H:%M:%S] SENT:"
+
+MESSAGE="$1"
+TOPIC="${2:-SOSXR/debug}"
+
+# validate message
+[ -z "$MESSAGE" ] && { echo "Usage: $0 <message> [topic]"; exit 1; }
+
+# ensure log directory exists
+[ ! -d "$LOGDIR" ] && mkdir -p "$LOGDIR"
+
+# ensure log file exists
+[ ! -f "$LOGFILE" ] && touch "$LOGFILE"
+
+# ensure current user can write to it
+[ ! -w "$LOGFILE" ] && chown "$(whoami):$(whoami)" "$LOGFILE"
+
+mosquitto_pub -h localhost -t "$TOPIC" -m "$MESSAGE" -u SOLO -P SOLO1B11 | ts "$LOGHEADER" | tee -a "$LOGFILE"
