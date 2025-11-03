@@ -1,6 +1,6 @@
 # Store this file at `/etc/systemd/system/mqtt-subscribe-to-all.service`
 # First time, run by:
-# sudo systemctl daemon-reload
+# sudo systemctl daemon-reloadq
 # sudo systemctl enable mqtt-subscribe-to-all.service
 # sudo systemctl start mqtt-subscribe-to-all.service
 # View live logs via: `journalctl -u mqtt-subscribe-to-all.service -f`
