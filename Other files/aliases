@@ -1,0 +1,2 @@
+alias rasplivelog="journalctl -u mqtt-subscribe-to-all.service -f"
+alias rasplog="cat /var/log/mqtt-subscribe-to-all.log"
