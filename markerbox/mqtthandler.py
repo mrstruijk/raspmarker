@@ -41,9 +41,10 @@ class MQTTHandler:
 
     def start(self):
         #self.client.loop_start()
-
         thread = threading.Thread(target=self.client.loop_forever, daemon=True)
         thread.start()
+        print("MQTT thread started")
+
 
     def publish_to_default_topic(self, payload):
         print(f"Publishing to default topic: {self.default_topic}, payload: {payload}")
