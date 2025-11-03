@@ -45,7 +45,7 @@ def start_services():
         from mqtthandler import MQTTHandler
         global mqtt_handler
         mqtt_handler = MQTTHandler(
-            broker="localhost",
+            broker="192.168.178.90",
             port=1883,
             username="SOLO",
             password="SOLO1B11",
